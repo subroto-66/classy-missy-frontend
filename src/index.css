@@ -1,0 +1,177 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+
+  --background: #ffffff;
+  --background-secondary: #f7f7f7;
+  --background-custom: #ededed;
+
+  --foreground: #111111;
+  --foreground-secondary: #6b6b6b;
+
+  --primary: #171717;
+  --primary-foreground: #ffffff;
+  --secondary: #333333;
+
+  --shadow-value-custom:
+    0 10px 24px -8px rgb(0 0 0 / 0.14),
+    0 4px 8px -5px rgb(0 0 0 / 0.12);
+
+  --dropdown-background: #ffffff;
+  --border: #e5e5e5;
+
+  --input-placeholder: #8a8a8a;
+  --input-background: #fafafa;
+  --input-disabled-background: #f0f0f0;
+  --input-border: #d6d6d6;
+  --input-active-border: #333333;
+  --input-active-ring: #bdbdbd;
+  --input-icon: #666666;
+  --input-text: #111111;
+  --input-hover-text: #111111;
+
+  --font-poppins: "Poppins", sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-custom: var(--background-custom);
+
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+
+  --color-dropdown-background: var(--dropdown-background);
+  --color-border: var(--border);
+
+  --color-input-placeholder: var(--input-placeholder);
+  --color-input-background: var(--input-background);
+  --color-input-disabled-background: var(--input-disabled-background);
+  --color-input-border: var(--input-border);
+  --color-input-active-border: var(--input-active-border);
+  --color-input-active-ring: var(--input-active-ring);
+  --color-input-icon: var(--input-icon);
+  --color-input-text: var(--input-text);
+  --color-input-hover-text: var(--input-hover-text);
+
+  --shadow-custom: var(--shadow-value-custom);
+  --font-sans: var(--font-poppins);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-poppins);
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+.custom-scrollbar {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+
+.custom-scrollbar:hover {
+  scrollbar-color: var(--border) transparent;
+}
+
+.price-range-thumb {
+  pointer-events: none;
+}
+
+.price-range-thumb::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+}
+
+.price-range-thumb::-moz-range-track {
+  height: 6px;
+  background: transparent;
+}
+
+.price-range-thumb::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  appearance: none;
+  pointer-events: auto;
+  border: 2px solid var(--background);
+  border-radius: 9999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.price-range-thumb::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  pointer-events: auto;
+  border: 2px solid var(--background);
+  border-radius: 9999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+@keyframes cart-check {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-25deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.15) rotate(6deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+.cart-drawer-enter {
+  animation: cart-drawer-enter 220ms ease-out both;
+}
+
+@keyframes cart-drawer-enter {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-drawer-enter {
+    animation: none;
+  }
+}

@@ -1,0 +1,183 @@
+const highlightImages = {
+  water: "https://img.icons8.com/fluency/96/water.png",
+  leaf: "https://img.icons8.com/fluency/96/leaf.png",
+  faceMask: "https://img.icons8.com/fluency/96/face-mask.png",
+  sparkle: "https://img.icons8.com/fluency/96/sparkling.png",
+  sun: "https://img.icons8.com/fluency/96/sun.png",
+  heart: "https://img.icons8.com/fluency/96/heart-with-pulse.png",
+};
+
+const products = [
+  {
+    id: "paulas-choice-bha",
+    name: "Skin Perfecting 2% BHA Liquid Exfoliant",
+    brand: "Paula's Choice",
+    image:
+      "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=720&q=85",
+    images: [
+      "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1000&q=90",
+    ],
+    price: 2550,
+    oldPrice: 2750,
+    rating: 4.9,
+    reviews: 128,
+    badge: "Glow of the day",
+    category: "Skincare",
+    problems: ["Sensitive skin", "Radiance", "Skin barrier"],
+    highlights: [
+      { title: "Gentle exfoliation", image: highlightImages.leaf },
+      { title: "Smooth-looking ", image: highlightImages.sparkle },
+      { title: "Easy routine ", image: highlightImages.water },
+      { title: "Smooth-looking ", image: highlightImages.sparkle },
+
+    ],
+  },
+  {
+    id: "panoxyl-acne-wash",
+    name: "Acne Foaming Wash 10% Benzoyl Peroxide",
+    brand: "PanOxyl",
+    image:
+      "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=720&q=85",
+    images: [
+      "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=1000&q=90",
+    ],
+    price: 2340,
+    oldPrice: 2590,
+    rating: 4.7,
+    reviews: 96,
+    badge: "Best seller",
+    category: "Skincare",
+    problems: ["Blemishes", "Oil control", "Breakout care"],
+    highlights: [
+      { title: "Daily cleansing", image: highlightImages.water },
+      { title: "For blemish-prone skin", image: highlightImages.faceMask },
+      { title: "Easy rinse formula", image: highlightImages.leaf },
+    ],
+  },
+  {
+    id: "ordinary-glycolic-acid",
+    name: "Glycolic Acid 7% Exfoliating Toner",
+    brand: "The Ordinary",
+    image:
+      "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=720&q=85",
+    images: [
+      "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=1000&q=90",
+    ],
+    price: 2900,
+    oldPrice: null,
+    rating: 5.0,
+    reviews: 74,
+    badge: null,
+    category: "Skincare",
+    problems: ["Uneven tone", "Radiance", "Breakout care"],
+    highlights: [
+      { title: "Exfoliating toner", image: highlightImages.water },
+      { title: "Helps refine skin texture", image: highlightImages.sparkle },
+      { title: "Evening routine", image: highlightImages.sun },
+    ],
+  },
+  {
+    id: "cerave-retinol-serum",
+    name: "Resurfacing Retinol Serum",
+    brand: "CeraVe",
+    image:
+      "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=720&q=85",
+    images: [
+      "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=1000&q=90",
+    ],
+    price: 2750,
+    oldPrice: 3000,
+    rating: 4.7,
+    reviews: 83,
+    badge: "Glow of the day",
+    category: "Skincare",
+    problems: ["Mature skin", "Uneven tone", "Breakout care"],
+    highlights: [
+      { title: "Retinol serum", image: highlightImages.faceMask },
+      { title: "Evening skincare step", image: highlightImages.sun },
+      { title: "Smoothing care", image: highlightImages.sparkle },
+    ],
+  },
+  {
+    id: "cerave-skin-renewing",
+    name: "Skin Renewing Retinol Serum",
+    brand: "CeraVe",
+    image:
+      "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=720&q=85",
+    images: [
+      "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1000&q=90",
+    ],
+    price: 2698,
+    oldPrice: 3000,
+    rating: 4.8,
+    reviews: 61,
+    badge: "Popular",
+    category: "Skincare",
+    problems: ["Mature skin", "Uneven tone", "Skin barrier"],
+    highlights: [
+      { title: "Skin-renewing care", image: highlightImages.sparkle },
+      { title: "Hydrating serum", image: highlightImages.water },
+      { title: "Daily routine friendly", image: highlightImages.heart },
+    ],
+  },
+  {
+    id: "ordinary-squalane-cleanser",
+    name: "Squalane Cleanser",
+    brand: "The Ordinary",
+    image:
+      "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=720&q=85",
+    images: [
+      "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=1000&q=90",
+    ],
+    price: 3570,
+    oldPrice: 4200,
+    rating: 4.7,
+    reviews: 112,
+    badge: "Limited offer",
+    category: "Skincare",
+    problems: ["Oil control", "Dehydration", "Sensitive skin"],
+    highlights: [
+      { title: "Gentle cleansing", image: highlightImages.leaf },
+      { title: "Comfortable rinse-off texture", image: highlightImages.water },
+      { title: "Everyday use", image: highlightImages.heart },
+    ],
+  },
+  {
+    id: "daily-moisturizer",
+    name: "Daily Hydrating Moisturizer",
+    brand: "CeraVe",
+    image:
+      "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=720&q=85",
+    images: [
+      "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=1000&q=90",
+      "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=1000&q=90",
+    ],
+    price: 1850,
+    oldPrice: 2100,
+    rating: 4.8,
+    reviews: 52,
+    badge: null,
+    category: "Skincare",
+    problems: ["Dehydration", "Sensitive skin", "Skin barrier"],
+    highlights: [
+      { title: "Daily hydration", image: highlightImages.water },
+      { title: "Comforting moisturizer", image: highlightImages.heart },
+      { title: "Routine essential", image: highlightImages.leaf },
+    ],
+  },
+];
+
+export default products;
