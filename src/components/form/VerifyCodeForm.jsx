@@ -7,8 +7,6 @@ import { showApiErrorToast } from "../../utils/apiErrorToast";
 import Button from "../ui/Button";
 import OTPInput from "../ui/OtpInput";
 
-
-
 export default function VerifyCodeForm() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -30,20 +28,22 @@ export default function VerifyCodeForm() {
     try {
       setLoading(true);
 
-    //   const res = await api.post("/verify-code", {
-    //     email,
-    //     code: data.otp,
-    //   });
+      const res = await api.post("/verify-code", {
+        email,
+        code: data.otp,
+      });
 
-    //   const resetToken = res.data?.data?.resetToken;
+      const resetToken = res.data?.data?.resetToken;
 
-    //   sessionStorage.setItem("resetToken", resetToken);
+      if (resetToken) {
+        sessionStorage.setItem("resetToken", resetToken);
+      }
+
+      toast.success("OTP verified successfully");
 
       navigate(
         `/reset-password?email=${encodeURIComponent(email)}`
       );
-
-      toast.success("OTP verified successfully");
     } catch (error) {
       showApiErrorToast(error);
     } finally {

@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import { FiTag } from "react-icons/fi";
 import Container from "../../components/layouts/Container";
 import PageBanner from "../../components/shared/PageBanner";
 import campaigns from "../../data/campaigns";
+import api from "../../lib/axios";
 
-const coupons = [
+const defaultCoupons = [
   {
     code: "GLOW10",
     offer: "10% off",
@@ -31,6 +33,23 @@ const coupons = [
 ];
 
 export default function Coupons() {
+  const [coupons, setCoupons] = useState(defaultCoupons);
+
+  useEffect(() => {
+    let active = true;
+    api.get("/coupons")
+      .then((res) => {
+        if (active && res.data?.data && res.data.data.length > 0) {
+          setCoupons(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <section className="py-5 sm:py-8 lg:py-10">
       <Container className="space-y-7 sm:space-y-9">
@@ -38,7 +57,7 @@ export default function Coupons() {
           eyebrow="Something special for you"
           title="Coupons & offers"
           description="A little extra love for your next order. Check the details on each offer before checkout."
-          image={campaigns[1].image}
+          image={campaigns[1]?.image || campaigns[0]?.image}
           alt=""
         />
 

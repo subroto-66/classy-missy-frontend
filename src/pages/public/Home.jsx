@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -15,46 +15,32 @@ import p2 from "../../assets/home/promo1.jpg";
 import p3 from "../../assets/home/promo2.jpg";
 import p4 from "../../assets/home/promo3.jpg";
 
-import need from "../../assets/home/need.jpg"
+import need from "../../assets/home/need.jpg";
 
 import t1 from "../../assets/home/b1.jpg";
 import t2 from "../../assets/home/b2.jpg";
 
 import flash from "../../assets/home/banner-1.gif";
-import products from "../../data/products";
-import campaigns from "../../data/campaigns";
-import categories from "../../data/categories";
+import productsMock from "../../data/products";
+import campaignsMock from "../../data/campaigns";
+import categoriesMock from "../../data/categories";
+import brandsMock from "../../data/brands";
+import blogsMock from "../../data/blogs";
+
 import ProductSlider from "../../components/shared/ProductSlider";
 import CampaignSlider from "../../components/shared/CampaignSlider";
 import BrandSlider from "../../components/shared/BrandSlider";
 import FindByProblem from "../../components/shared/FindByProblem";
 import CategoryMarquee from "../../components/shared/CategoryMarquee";
 import BlogCard from "../../components/public/BlogCard";
+import api from "../../lib/axios";
 
-import brands from "../../data/brands";
-import blogs from "../../data/blogs";
+import y1 from "../../assets/home/y1.jpg";
+import y2 from "../../assets/home/y2.jpg";
+import y3 from "../../assets/home/y3.jpg";
+import y4 from "../../assets/home/y4.jpg";
 
-import y1 from "../../assets/home/y1.jpg"
-import y2 from "../../assets/home/y2.jpg"
-import y3 from "../../assets/home/y3.jpg"
-import y4 from "../../assets/home/y4.jpg"
-
-const beauty = [y1,y2,y3,y4]
-
-const skinProblems = [
-  { label: "Blemishes", title: "Acne & breakouts", solutions: "04 solutions", image: products[1].image },
-  { label: "Sensitive skin", title: "Redness & sensitivity", solutions: "06 solutions", image: products[0].image },
-  { label: "Uneven tone", title: "Dark spots", solutions: "05 solutions", image: products[2].image },
-  { label: "Mature skin", title: "Fine lines & wrinkles", solutions: "08 solutions", image: products[3].image },
-  { label: "Dehydration", title: "Dry, thirsty skin", solutions: "07 solutions", image: products[6].image },
-  { label: "Oil control", title: "Oily skin & pores", solutions: "05 solutions", image: products[5].image },
-  { label: "Radiance", title: "Dullness & fatigue", solutions: "06 solutions", image: products[4].image },
-  { label: "Skin barrier", title: "Dryness & irritation", solutions: "04 solutions", image: products[0].image },
-  { label: "Hair health", title: "Hair fall & thinning", solutions: "04 solutions", image: products[5].image },
-  { label: "Daily protection", title: "Sun care & SPF", solutions: "06 solutions", image: products[2].image },
-  { label: "Scalp care", title: "Dry, itchy scalp", solutions: "05 solutions", image: products[6].image },
-  { label: "Breakout care", title: "Post-acne marks", solutions: "05 solutions", image: products[1].image },
-];
+const beauty = [y1, y2, y3, y4];
 
 const slides = [
   {
@@ -77,7 +63,7 @@ const slides = [
 const promo = [
   {
     type: "video",
-    image: p1, // MP4 video path
+    image: p1,
     alt: "Promo video",
     href: "/brands",
   },
@@ -104,6 +90,86 @@ const promo = [
 export default function Home() {
   const swiperRef = useRef(null);
 
+  const [productsList, setProductsList] = useState(productsMock);
+  const [categoriesList, setCategoriesList] = useState(categoriesMock);
+  const [campaignsList, setCampaignsList] = useState(campaignsMock);
+  const [brandsList, setBrandsList] = useState(brandsMock);
+  const [blogsList, setBlogsList] = useState(blogsMock);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    // Fetch Products
+    api.get("/products?all=1")
+      .then((res) => {
+        if (isMounted && res.data?.data && res.data.data.length > 0) {
+          setProductsList(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch Categories
+    api.get("/categories")
+      .then((res) => {
+        if (isMounted && res.data?.data && res.data.data.length > 0) {
+          setCategoriesList(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch Campaigns
+    api.get("/campaigns")
+      .then((res) => {
+        if (isMounted && res.data?.data && res.data.data.length > 0) {
+          setCampaignsList(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch Brands
+    api.get("/brands")
+      .then((res) => {
+        if (isMounted && res.data?.data && res.data.data.length > 0) {
+          setBrandsList(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch Blogs
+    api.get("/blogs")
+      .then((res) => {
+        if (isMounted && res.data?.data && res.data.data.length > 0) {
+          setBlogsList(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const getProductImage = (idx) => {
+    return productsList[idx]?.image || productsMock[idx]?.image || productsMock[0].image;
+  };
+
+  const skinProblems = [
+    { label: "Blemishes", title: "Acne & breakouts", solutions: "04 solutions", image: getProductImage(1) },
+    { label: "Sensitive skin", title: "Redness & sensitivity", solutions: "06 solutions", image: getProductImage(0) },
+    { label: "Uneven tone", title: "Dark spots", solutions: "05 solutions", image: getProductImage(2) },
+    { label: "Mature skin", title: "Fine lines & wrinkles", solutions: "08 solutions", image: getProductImage(3) },
+    { label: "Dehydration", title: "Dry, thirsty skin", solutions: "07 solutions", image: getProductImage(4) },
+    { label: "Oil control", title: "Oily skin & pores", solutions: "05 solutions", image: getProductImage(1) },
+    { label: "Radiance", title: "Dullness & fatigue", solutions: "06 solutions", image: getProductImage(0) },
+    { label: "Skin barrier", title: "Dryness & irritation", solutions: "04 solutions", image: getProductImage(3) },
+    { label: "Hair health", title: "Hair fall & thinning", solutions: "04 solutions", image: getProductImage(2) },
+    { label: "Daily protection", title: "Sun care & SPF", solutions: "06 solutions", image: getProductImage(1) },
+    { label: "Scalp care", title: "Dry, itchy scalp", solutions: "05 solutions", image: getProductImage(4) },
+    { label: "Breakout care", title: "Post-acne marks", solutions: "05 solutions", image: getProductImage(0) },
+  ];
+
+  const onSaleProducts = productsList.filter((p) => p.oldPrice || p.old_price);
+  const featuredProducts = productsList.filter((p) => p.is_featured);
 
   return (
     <section className="py-5 sm:py-8 lg:py-10">
@@ -194,7 +260,7 @@ export default function Home() {
           ))}
         </div>
 
-        <CategoryMarquee categories={categories} />
+        <CategoryMarquee categories={categoriesList} />
 
         <FindByProblem image={need} problems={skinProblems} />
 
@@ -202,7 +268,7 @@ export default function Home() {
           <ProductSlider
             subtitle={"Premium Products"}
             title={"Curated for you"}
-            productData={products}
+            productData={productsList}
           />
         </div>
 
@@ -217,39 +283,48 @@ export default function Home() {
         <ProductSlider
           subtitle={"On Sale Products"}
           title={"Curated for you"}
-          productData={products}
+          productData={onSaleProducts.length ? onSaleProducts : productsList}
         />
-        <CampaignSlider subtitle={"Campaigns"}
-          title={"Curated for you"} camp = {campaigns}/>
+
+        <CampaignSlider
+          subtitle={"Campaigns"}
+          title={"Curated for you"}
+          camp={campaignsList}
+        />
+
         <ProductSlider
           subtitle={"New Arrivals"}
           title={"Curated for you"}
-          productData={products}
+          productData={productsList}
         />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <img src={t1} alt={""} className="h-full rounded-xl w-full object-cover" />
-          <img src={t2} alt={""} className="h-full rounded-xl w-full object-cover" />
+          <img src={t1} alt="" className="h-full rounded-xl w-full object-cover" />
+          <img src={t2} alt="" className="h-full rounded-xl w-full object-cover" />
         </div>
 
         <ProductSlider
           subtitle={"Best Selling Products"}
           title={"Curated for you"}
-          productData={products}
+          productData={productsList}
         />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             {
-              beauty.map((b,indx) => {
-                return(<img className="rounded-xl" key={indx} src={b}/>)
-              })
-             }
+          {beauty.map((b, indx) => (
+            <img className="rounded-xl" key={indx} src={b} alt={`Beauty ${indx}`} />
+          ))}
         </div>
-        <BrandSlider subtitle={"New brands"}
-          title={"Fall in love with the latest novelties and best-sellers from your favorite brands!"} brand = {brands}/>
-          
+
+        <BrandSlider
+          subtitle={"New brands"}
+          title={"Fall in love with the latest novelties and best-sellers from your favorite brands!"}
+          brand={brandsList}
+        />
+
         <ProductSlider
           subtitle={"Featured Products"}
           title={"Curated for you"}
-          productData={products}
+          productData={featuredProducts.length ? featuredProducts : productsList}
         />
 
         <section aria-labelledby="home-blogs-title" className="space-y-5">
@@ -273,8 +348,8 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-4">
-            {blogs.slice(0, 3).map((blog) => (
-              <BlogCard key={blog.title} blog={blog} />
+            {blogsList.slice(0, 4).map((blog) => (
+              <BlogCard key={blog.slug || blog.title} blog={blog} />
             ))}
           </div>
         </section>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   FiArrowLeft,
   FiBookOpen,
@@ -8,14 +9,20 @@ import {
 import { Link, useParams } from "react-router";
 import BlogCard from "../../components/public/BlogCard";
 import Container from "../../components/layouts/Container";
-import blogs, { getBlogDetails, getBlogSlug } from "../../data/blogs";
+import blogsMock, { getBlogDetails, getBlogSlug } from "../../data/blogs";
+import api from "../../lib/axios";
 
 function formatDate(value) {
-  return new Intl.DateTimeFormat("en", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(`${value}T00:00:00`));
+  if (!value) return "";
+  try {
+    return new Intl.DateTimeFormat("en", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(`${value}T00:00:00`));
+  } catch {
+    return value;
+  }
 }
 
 function getSectionId(heading) {
@@ -29,7 +36,37 @@ function getSectionId(heading) {
 
 export default function BlogDetails() {
   const { blogSlug } = useParams();
-  const blog = blogs.find((item) => getBlogSlug(item) === blogSlug);
+  const [blog, setBlog] = useState(() => {
+    return blogsMock.find((item) => getBlogSlug(item) === blogSlug || item.slug === blogSlug);
+  });
+  const [loading, setLoading] = useState(!blog);
+
+  useEffect(() => {
+    let active = true;
+    api.get(`/blogs/${blogSlug}`)
+      .then((res) => {
+        if (!active) return;
+        if (res.data?.data) {
+          setBlog(res.data.data);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [blogSlug]);
+
+  if (loading) {
+    return (
+      <Container className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-foreground-secondary">Loading article...</p>
+      </Container>
+    );
+  }
 
   if (!blog) {
     return (
@@ -49,9 +86,12 @@ export default function BlogDetails() {
     );
   }
 
-  const details = getBlogDetails(blog);
-  const relatedBlogs = blogs
-    .filter((item) => item.category === blog.category && item.title !== blog.title)
+  const details = blog.sections?.length
+    ? { intro: blog.intro || blog.excerpt, sections: blog.sections, keyTakeaways: blog.keyTakeaways || blog.key_takeaways || [] }
+    : getBlogDetails(blog);
+
+  const relatedBlogs = blogsMock
+    .filter((item) => item.category === blog.category && (item.slug || getBlogSlug(item)) !== (blog.slug || getBlogSlug(blog)))
     .slice(0, 3);
 
   return (

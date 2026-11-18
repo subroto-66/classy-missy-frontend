@@ -5,6 +5,7 @@ import {
   FiShoppingBag,
   FiX,
 } from "react-icons/fi";
+import { Link } from "react-router";
 import { useCart } from "../../context/CartContext";
 import Button from "../ui/Button";
 import CartItem from "./CartItem";
@@ -126,14 +127,14 @@ export default function CartDrawer({ open, onClose }) {
                   <span>{formatPrice(subtotal)}</span>
                 </div>
               </div>
-              <Button
-
-                type="button"
-                className="w-full"
-                // className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-foreground px-5 text-sm font-semibold text-background transition-opacity hover:opacity-85"
-              >
-                Proceed to checkout <FiArrowRight size={16} />
-              </Button>
+              <Link to="/cart" onClick={onClose} className="block w-full">
+                <Button
+                  type="button"
+                  className="w-full"
+                >
+                  Proceed to checkout <FiArrowRight size={16} />
+                </Button>
+              </Link>
               <p className="mt-3 text-center text-[11px] text-foreground-secondary">
                 Delivery charges are calculated at checkout.
               </p>

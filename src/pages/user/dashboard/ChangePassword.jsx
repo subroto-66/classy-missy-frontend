@@ -2,15 +2,40 @@ import { useState } from "react";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
 import DashboardSectionCard from "./DashboardSectionCard";
+import api from "../../../lib/axios";
+import toast from "react-hot-toast";
+import { showApiErrorToast } from "../../../utils/apiErrorToast";
 
 export default function ChangePassword() {
-  const [message, setMessage] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setMessage(
-      "Password updates will be available when account services are connected.",
-    );
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await api.post("/user/change-password", {
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+
+      toast.success("Password updated successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      showApiErrorToast(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -24,14 +49,18 @@ export default function ChangePassword() {
           label="Current password"
           type="password"
           placeholder="Enter current password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
           required
           className="rounded-lg bg-white"
         />
         <Input
           label="New password"
           type="password"
-          placeholder="At least 8 characters"
-          minLength={8}
+          placeholder="At least 6 characters"
+          minLength={6}
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
           required
           className="rounded-lg bg-white"
         />
@@ -39,21 +68,19 @@ export default function ChangePassword() {
           label="Confirm new password"
           type="password"
           placeholder="Re-enter new password"
-          minLength={8}
+          minLength={6}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           required
           className="rounded-lg bg-white"
         />
         <Button
           type="submit"
+          loading={loading}
           className="rounded-lg bg-black text-white hover:bg-neutral-800"
         >
           Update password
         </Button>
-        {message && (
-          <p role="status" className="text-[11px] leading-5 text-neutral-600">
-            {message}
-          </p>
-        )}
       </form>
     </DashboardSectionCard>
   );

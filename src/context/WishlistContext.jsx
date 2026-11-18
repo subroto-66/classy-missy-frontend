@@ -16,7 +16,7 @@ function readStoredWishlist() {
     return parsedWishlist.filter(
       (product) =>
         product &&
-        typeof product.id === "string" &&
+        (typeof product.id === "string" || typeof product.id === "number") &&
         typeof product.name === "string" &&
         typeof product.price === "number",
     );
@@ -38,19 +38,19 @@ export function WishlistProvider({ children }) {
   }, [items]);
 
   const isWishlisted = (productId) =>
-    items.some((product) => product.id === productId);
+    items.some((product) => String(product.id) === String(productId));
 
   const toggleWishlist = (product) => {
     setItems((currentItems) =>
-      currentItems.some((item) => item.id === product.id)
-        ? currentItems.filter((item) => item.id !== product.id)
+      currentItems.some((item) => String(item.id) === String(product.id))
+        ? currentItems.filter((item) => String(item.id) !== String(product.id))
         : [...currentItems, product],
     );
   };
 
   const removeFromWishlist = (productId) => {
     setItems((currentItems) =>
-      currentItems.filter((item) => item.id !== productId),
+      currentItems.filter((item) => String(item.id) !== String(productId)),
     );
   };
 

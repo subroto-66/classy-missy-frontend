@@ -104,13 +104,15 @@ export default function ShoppingCart() {
         <p className="mt-3 text-[10px] leading-5 text-neutral-500">
           Delivery charges are calculated at checkout.
         </p>
-        <Button
-          type="button"
-          disabled
-          className="mt-5 w-full rounded-lg bg-black text-[11px] text-white"
-        >
-          Continue to checkout <FiArrowRight size={14} />
-        </Button>
+        <Link to="/cart" className="block mt-5">
+          <Button
+            type="button"
+            disabled={!items.length}
+            className="w-full rounded-lg bg-black text-[11px] text-white"
+          >
+            Continue to checkout <FiArrowRight size={14} />
+          </Button>
+        </Link>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FiArrowLeft,
   FiChevronLeft,
@@ -16,15 +16,51 @@ import ProductQuestions from "../../components/public/ProductQuestions";
 import ProductReviews from "../../components/public/ProductReviews";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
-import products from "../../data/products";
+import productsMock from "../../data/products";
 import { formatProductPrice, getProductSlug } from "../../lib/productUtils";
 import ProductSlider from "../../components/shared/ProductSlider";
+import api from "../../lib/axios";
 
 export default function ProductDetails() {
   const { productSlug } = useParams();
-  const product = products.find(
-    (item) => getProductSlug(item) === productSlug || item.id === productSlug,
-  );
+  const [product, setProduct] = useState(() => {
+    return productsMock.find(
+      (item) => getProductSlug(item) === productSlug || String(item.id) === String(productSlug) || item.slug === productSlug,
+    );
+  });
+  const [related, setRelated] = useState([]);
+  const [loading, setLoading] = useState(!product);
+
+  useEffect(() => {
+    let active = true;
+
+    api.get(`/products/${productSlug}`)
+      .then((res) => {
+        if (!active) return;
+        if (res.data?.data) {
+          setProduct(res.data.data);
+          if (res.data.related) {
+            setRelated(res.data.related);
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [productSlug]);
+
+  if (loading) {
+    return (
+      <Container className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-foreground-secondary">Loading product details...</p>
+      </Container>
+    );
+  }
 
   if (!product) {
     return (
@@ -43,10 +79,10 @@ export default function ProductDetails() {
     );
   }
 
-  return <ProductDetailsContent key={product.id} product={product} />;
+  return <ProductDetailsContent key={product.id || product.slug} product={product} relatedProducts={related} />;
 }
 
-function ProductDetailsContent({ product }) {
+function ProductDetailsContent({ product, relatedProducts = [] }) {
   const [activeTab, setActiveTab] = useState("description");
   const [selectedImage, setSelectedImage] = useState(0);
   const [added, setAdded] = useState(false);
@@ -369,10 +405,10 @@ function ProductDetailsContent({ product }) {
           <ProductReviews product={product} />
         </div>
         <ProductSlider
-          subtitle="On Sale Products"
+          subtitle="Related Products"
           title="Curated for you"
-          productData={products.filter(
-            (item) => item.id !== product.id && item.oldPrice,
+          productData={relatedProducts.length ? relatedProducts : productsMock.filter(
+            (item) => String(item.id) !== String(product.id) && (item.oldPrice || item.old_price),
           )}
         />
       </Container>

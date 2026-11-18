@@ -1,20 +1,38 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import Container from "../../components/layouts/Container";
 import CategoryCard from "../../components/shared/CategoryCard";
 import PageBanner from "../../components/shared/PageBanner";
-import categories from "../../data/categories";
+import categoriesMock from "../../data/categories";
+import api from "../../lib/axios";
 
 export default function Categories() {
+  const [categoriesList, setCategoriesList] = useState(categoriesMock);
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    api.get("/categories")
+      .then((res) => {
+        if (active && res.data?.data && res.data.data.length > 0) {
+          setCategoriesList(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const filteredCategories = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return categories.filter(
+    return categoriesList.filter(
       ({ name, description }) =>
         name.toLowerCase().includes(normalizedQuery) ||
-        description.toLowerCase().includes(normalizedQuery),
+        (description && description.toLowerCase().includes(normalizedQuery)),
     );
-  }, [query]);
+  }, [categoriesList, query]);
 
   return (
     <section className="py-5 sm:py-8 lg:py-10">
@@ -23,7 +41,7 @@ export default function Categories() {
           eyebrow="Find your everyday favorites"
           title="Shop by category"
           description="Explore thoughtful picks for every step of your beauty routine."
-          image={categories[0].image}
+          image={categoriesList[0]?.image || categoriesMock[0].image}
           alt=""
         />
 
@@ -47,7 +65,7 @@ export default function Categories() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5">
             {filteredCategories.map((category) => (
               <CategoryCard
-                key={category.name}
+                key={category.slug || category.name}
                 category={category}
                 className="w-full min-w-0"
               />

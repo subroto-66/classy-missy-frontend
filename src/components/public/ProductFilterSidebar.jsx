@@ -33,9 +33,8 @@ export default function ProductFilterSidebar({
     ...new Set(products.flatMap((product) => product.problems || [])),
   ].sort();
   const priceMin = 0;
-  const priceMax = Math.ceil(
-    Math.max(...products.map((product) => product.price)) / 500,
-  ) * 500;
+  const maxVal = products.length ? Math.max(...products.map((p) => p.price || 0)) : 5000;
+  const priceMax = Math.max(500, Math.ceil((maxVal || 5000) / 500) * 500);
   const minPrice = Math.min(
     Math.max(Number(searchParams.get("minPrice")) || priceMin, priceMin),
     priceMax - 50,

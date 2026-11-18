@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FiGrid, FiList, FiSliders } from "react-icons/fi";
 import { useSearchParams } from "react-router";
 import Container from "../../components/layouts/Container";
@@ -9,8 +9,9 @@ import ProductFilterSidebar from "../../components/public/ProductFilterSidebar";
 import ProductListCard from "../../components/public/ProductListCard";
 import ProductPagination from "../../components/public/ProductPagination";
 import SortDropdown from "../../components/public/SortDropdown";
-import products from "../../data/products";
-import campaigns from "../../data/campaigns";
+import productsMock from "../../data/products";
+import campaignsMock from "../../data/campaigns";
+import api from "../../lib/axios";
 
 const PAGE_SIZE = 6;
 
@@ -34,6 +35,33 @@ export default function Products() {
     ? searchParams.get("view")
     : "grid";
 
+  const [productsList, setProductsList] = useState(productsMock);
+  const [campaignsList, setCampaignsList] = useState(campaignsMock);
+
+  useEffect(() => {
+    let active = true;
+
+    api.get("/products?all=1")
+      .then((res) => {
+        if (active && res.data?.data && res.data.data.length > 0) {
+          setProductsList(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    api.get("/campaigns")
+      .then((res) => {
+        if (active && res.data?.data && res.data.data.length > 0) {
+          setCampaignsList(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const filteredProducts = useMemo(() => {
     const brands = searchParams.getAll("brand");
     const categories = searchParams.getAll("category");
@@ -46,23 +74,24 @@ export default function Products() {
     const hasMaxPrice = searchParams.has("maxPrice") && Number.isFinite(maxPrice);
     const sort = searchParams.get("sort");
 
-    const result = products.filter((product) => {
+    const result = productsList.filter((product) => {
       const matchesBrand = !brands.length || brands.includes(product.brand);
       const matchesCategory =
         !categories.length || categories.includes(product.category);
       const matchesCampaign =
         !selectedCampaigns.length ||
-        selectedCampaigns.some((slug) =>
-          campaigns.find((campaign) => campaign.slug === slug)?.productIds.includes(
-            product.id,
-          ),
-        );
+        selectedCampaigns.some((slug) => {
+          const camp = campaignsList.find((campaign) => campaign.slug === slug);
+          return camp?.productIds?.some(
+            (id) => String(id) === String(product.id) || String(id) === String(product.slug)
+          );
+        });
       const matchesProblem =
         !problems.length ||
         problems.some((problem) => product.problems?.includes(problem));
       const matchesMinPrice = !hasMinPrice || product.price >= minPrice;
       const matchesMaxPrice = !hasMaxPrice || product.price <= maxPrice;
-      const matchesSale = !saleOnly || Boolean(product.oldPrice);
+      const matchesSale = !saleOnly || Boolean(product.oldPrice || product.old_price);
       return (
         matchesBrand &&
         matchesCategory &&
@@ -129,7 +158,7 @@ export default function Products() {
         <div className="relative isolate flex min-h-52 items-center overflow-hidden rounded-2xl bg-background-secondary px-5 py-8 sm:min-h-64 sm:px-10 lg:px-14">
           <div className="absolute inset-y-0 right-0 z-0 w-2/3 sm:w-1/2">
             <img
-              src={products[0].image}
+              src={productsList[0]?.image || productsMock[0].image}
               alt=""
               className="h-full w-full object-cover opacity-25"
             />
@@ -154,11 +183,11 @@ export default function Products() {
             className={`${filtersOpen ? "block" : "hidden"} lg:sticky lg:top-28 lg:block`}
           >
             <ProductFilterSidebar
-              products={products}
+              products={productsList}
               searchParams={searchParams}
               setSearchParams={setSearchParams}
               onClose={() => setFiltersOpen(false)}
-              campaigns={campaigns}
+              campaigns={campaignsList}
             />
           </aside>
 

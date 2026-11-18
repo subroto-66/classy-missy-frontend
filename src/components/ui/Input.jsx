@@ -61,6 +61,7 @@ const Input = React.forwardRef(
             ref={ref}
             type={inputType}
             disabled={disabled}
+            required={required}
             maxLength={isNumber ? numberMaxLength : maxLength}
             onKeyDown={handleKeyDown}
             onChange={handleChange}

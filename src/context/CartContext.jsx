@@ -16,7 +16,7 @@ function readStoredCart() {
     return parsedCart.filter(
       (item) =>
         item &&
-        typeof item.id === "string" &&
+        (typeof item.id === "string" || typeof item.id === "number") &&
         typeof item.name === "string" &&
         typeof item.price === "number" &&
         Number.isInteger(item.quantity) &&
@@ -41,11 +41,11 @@ export function CartProvider({ children }) {
 
   const addToCart = (product, quantity = 1) => {
     setItems((currentItems) => {
-      const existingItem = currentItems.find((item) => item.id === product.id);
+      const existingItem = currentItems.find((item) => String(item.id) === String(product.id));
 
       if (existingItem) {
         return currentItems.map((item) =>
-          item.id === product.id
+          String(item.id) === String(product.id)
             ? { ...item, quantity: item.quantity + quantity }
             : item,
         );
@@ -58,22 +58,26 @@ export function CartProvider({ children }) {
   const setQuantity = (productId, quantity) => {
     setItems((currentItems) =>
       quantity < 1
-        ? currentItems.filter((item) => item.id !== productId)
+        ? currentItems.filter((item) => String(item.id) !== String(productId))
         : currentItems.map((item) =>
-            item.id === productId ? { ...item, quantity } : item,
+            String(item.id) === String(productId) ? { ...item, quantity } : item,
           ),
     );
   };
 
   const removeFromCart = (productId) => {
     setItems((currentItems) =>
-      currentItems.filter((item) => item.id !== productId),
+      currentItems.filter((item) => String(item.id) !== String(productId)),
     );
+  };
+
+  const clearCart = () => {
+    setItems([]);
   };
 
   return (
     <CartContext.Provider
-      value={{ items, addToCart, setQuantity, removeFromCart }}
+      value={{ items, addToCart, setQuantity, removeFromCart, clearCart }}
     >
       {children}
     </CartContext.Provider>

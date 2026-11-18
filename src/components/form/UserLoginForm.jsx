@@ -6,14 +6,14 @@ import CustomLink from "../ui/CustomLink";
 import Button from "../ui/Button";
 import SectionSubTitle from "../typo/SectionSubTitle";
 import { useForm } from "react-hook-form";
-import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import { showApiErrorToast } from "../../utils/apiErrorToast";
+import { useAuth } from "../../context/AuthContext";
 
 export default function UserLoginForm() {
-
- const [loading, setLoading] = useState(false);
-  const router = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const {
     register,
@@ -24,14 +24,9 @@ export default function UserLoginForm() {
   const onSubmit = async (data) => {
     try {
       setLoading(true);
-      const response = await api.post("/login", data);
-      const user = response.data.data;
+      await login(data);
       toast.success("Login Success");
-    //   if (user.role === "admin") {
-    //     router.push("/admin-dashboard");
-    //   } else {
-    //     router.push("/user-dashboard");
-    //   }
+      navigate("/dashboard");
     } catch (error) {
       showApiErrorToast(error);
     } finally {
@@ -73,7 +68,7 @@ export default function UserLoginForm() {
       </div>
       <div className="flex justify-between">
         <Checkbox {...register("rememberMe")} label="Remember Me" />
-        <CustomLink text="Forgot Passowrd" href="/forgot-password" />
+        <CustomLink text="Forgot Password" href="/forgot-password" />
       </div>
       <Button loading={loading} type="submit" className="my-4 w-full">
         Login
@@ -83,9 +78,6 @@ export default function UserLoginForm() {
         Don't have an account?{" "}
         <CustomLink className="ml-2" href="/register" text="Register" />
       </SectionSubTitle>
-
-      {/* <Divider className="mt-6" text="Or continue with" /> */}
-      {/* <SocialLogins /> */}
     </form>
   );
 }

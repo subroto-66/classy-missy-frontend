@@ -11,9 +11,12 @@ import {
   FiUser,
   FiX,
 } from "react-icons/fi";
-import { Link, NavLink, Outlet, useLocation } from "react-router";
-import { CartProvider, useCart } from "../context/CartContext";
+import { LuLoaderCircle } from "react-icons/lu";
+import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { useCart } from "../context/CartContext";
 import Logo from "../components/shared/Logo";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const navigation = [
   { path: "/dashboard", label: "Dashboard", icon: FiHome, end: true },
@@ -25,14 +28,17 @@ const navigation = [
   { path: "/dashboard/reviews", label: "My reviews", icon: FiStar },
 ];
 
-const profileImage =
+const defaultAvatar =
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&h=160&q=85";
 
-function DashboardShell() {
+export default function DashboardLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { items } = useCart();
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
+  const navigate = useNavigate();
+  const { user, isAuthenticated, loading, logout } = useAuth();
   const cartCount = items.reduce((total, item) => total + item.quantity, 0);
   const sectionTitle =
     navigation.find((item) => item.path === pathname)?.label ?? "Dashboard";
@@ -44,6 +50,31 @@ function DashboardShell() {
       setSidebarCollapsed((collapsed) => !collapsed);
     }
   };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logged out successfully");
+      navigate("/login");
+    } catch {
+      navigate("/login");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-neutral-50">
+        <div className="flex flex-col items-center gap-3">
+          <LuLoaderCircle className="h-8 w-8 animate-spin text-neutral-800" />
+          <p className="text-xs text-neutral-500">Loading your account...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900 md:flex">
@@ -133,16 +164,17 @@ function DashboardShell() {
             sidebarCollapsed ? "md:px-3" : ""
           }`}
         >
-          <Link
-            to="/login"
+          <button
+            type="button"
+            onClick={handleLogout}
             title={sidebarCollapsed ? "Log out" : undefined}
-            className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 text-[13px] font-medium text-neutral-700 transition-colors hover:bg-neutral-100 ${
+            className={`flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-[13px] font-medium text-neutral-700 transition-colors hover:bg-neutral-100 ${
               sidebarCollapsed ? "md:justify-center md:px-0" : ""
             }`}
           >
             <FiLogOut size={18} className="shrink-0" />
             <span className={sidebarCollapsed ? "md:hidden" : ""}>Log out</span>
-          </Link>
+          </button>
           <p
             className={`mt-4 px-3 text-[10px] text-neutral-400 ${
               sidebarCollapsed ? "md:hidden" : ""
@@ -175,16 +207,16 @@ function DashboardShell() {
           </div>
           <div className="flex items-center gap-3">
             <img
-              src={profileImage}
-              alt="Sarah Johnson"
-              className="h-10 w-10 rounded-full object-cover grayscale ring-2 ring-neutral-200"
+              src={user?.avatar || defaultAvatar}
+              alt={user?.name || "Customer"}
+              className="h-10 w-10 rounded-full object-cover ring-2 ring-neutral-200"
             />
-            <div className="hidden sm:block">
+            <div className="hidden sm:block text-left">
               <p className="text-[13px] font-semibold leading-5 text-black">
-                Sarah Johnson
+                {user?.name || "Customer"}
               </p>
               <p className="text-[11px] leading-4 text-neutral-500">
-                sarah.johnson@email.com
+                {user?.email || "Signed in"}
               </p>
             </div>
           </div>
@@ -195,13 +227,5 @@ function DashboardShell() {
         </main>
       </div>
     </div>
-  );
-}
-
-export default function DashboardLayout() {
-  return (
-    <CartProvider>
-      <DashboardShell />
-    </CartProvider>
   );
 }

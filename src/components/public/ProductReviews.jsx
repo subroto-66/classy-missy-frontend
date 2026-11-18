@@ -4,6 +4,8 @@
 import { useEffect, useState } from "react";
 import { FiStar, FiUser, FiEdit3 } from "react-icons/fi";
 import Button from "../ui/Button";
+import api from "../../lib/axios";
+import { useAuth } from "../../context/AuthContext";
 
 function getStorageKey(productId) {
   return `classy-missy-product-reviews-${productId}`;
@@ -53,51 +55,84 @@ export default function ProductReviews({ product }) {
 }
 
 function ProductReviewsContent({ product }) {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState([]);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(user?.name || "");
   const [text, setText] = useState("");
   const [rating, setRating] = useState(5);
   const [notice, setNotice] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    setReviews(readReviews(product.id));
-  }, [product.id]);
+    let active = true;
+    const local = readReviews(product.id);
 
-  const saveReviews = (nextReviews) => {
+    api.get(`/products/${product.slug || product.id}/reviews`)
+      .then((res) => {
+        if (!active) return;
+        if (Array.isArray(res.data?.data) && res.data.data.length > 0) {
+          setReviews(res.data.data);
+        } else {
+          setReviews(local);
+        }
+      })
+      .catch(() => {
+        if (active) setReviews(local);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [product.id, product.slug]);
+
+  const saveReviews = async (newReview) => {
     try {
-      localStorage.setItem(
-        getStorageKey(product.id),
-        JSON.stringify(nextReviews)
-      );
+      setSubmitting(true);
+      const res = await api.post(`/products/${product.slug || product.id}/reviews`, {
+        name: newReview.name,
+        text: newReview.text,
+        rating: newReview.rating,
+      });
 
+      const saved = res.data?.data || newReview;
+      const nextReviews = [saved, ...reviews];
       setReviews(nextReviews);
-      setNotice("Your review was saved successfully.");
-    } catch (error) {
-      console.error("Could not save product reviews.", error);
-      setNotice("Could not save your review.");
+      try {
+        localStorage.setItem(getStorageKey(product.id), JSON.stringify(nextReviews));
+      } catch {}
+
+      setNotice("Your review was posted successfully!");
+    } catch {
+      // Fallback local save
+      const nextReviews = [newReview, ...reviews];
+      try {
+        localStorage.setItem(getStorageKey(product.id), JSON.stringify(nextReviews));
+      } catch {}
+      setReviews(nextReviews);
+      setNotice("Your review was saved.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const submitReview = (event) => {
     event.preventDefault();
 
-    const reviewerName = name.trim();
+    const reviewerName = name.trim() || user?.name || "Customer";
     const reviewText = text.trim();
 
     if (!reviewerName || !reviewText) return;
 
-    saveReviews([
-      {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        name: reviewerName,
-        text: reviewText,
-        rating,
-        createdAt: new Date().toISOString(),
-      },
-      ...reviews,
-    ]);
+    saveReviews({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      name: reviewerName,
+      text: reviewText,
+      review: reviewText,
+      rating,
+      createdAt: new Date().toISOString(),
+    });
 
-    setName("");
+    if (!user) setName("");
     setText("");
     setRating(5);
   };

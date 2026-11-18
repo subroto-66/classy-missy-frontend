@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import Search from "../ui/Search";
-import products from "../../data/products";
+import productsMock from "../../data/products";
 import { formatProductPrice, getProductSlug } from "../../lib/productUtils";
+import api from "../../lib/axios";
 
 const DEBOUNCE_MS = 250;
 
@@ -15,6 +16,8 @@ export default function ProductSearch({
 }) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const wrapperRef = useRef(null);
   const navigate = useNavigate();
@@ -36,17 +39,57 @@ export default function ProductSearch({
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, []);
 
-  const normalizedQuery = debouncedQuery.toLowerCase();
-  const matches = normalizedQuery
-    ? products
-        .filter((product) =>
-          [product.name, product.brand, product.badge]
-            .filter(Boolean)
-            .some((value) => value.toLowerCase().includes(normalizedQuery)),
-        )
-        .slice(0, 6)
-    : [];
-  const showResults = isFocused && Boolean(normalizedQuery);
+  useEffect(() => {
+    if (!debouncedQuery) {
+      setMatches([]);
+      return;
+    }
+
+    let active = true;
+    setLoading(true);
+
+    api
+      .get("/products", { params: { search: debouncedQuery, limit: 6 } })
+      .then((res) => {
+        if (!active) return;
+        const results = res.data?.data;
+        if (Array.isArray(results) && results.length > 0) {
+          setMatches(results);
+        } else {
+          // Fallback to local filter if API returned empty
+          const normalized = debouncedQuery.toLowerCase();
+          const fallback = productsMock
+            .filter((p) =>
+              [p.name, p.brand, p.badge]
+                .filter(Boolean)
+                .some((val) => val.toLowerCase().includes(normalized)),
+            )
+            .slice(0, 6);
+          setMatches(fallback);
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        const normalized = debouncedQuery.toLowerCase();
+        const fallback = productsMock
+          .filter((p) =>
+            [p.name, p.brand, p.badge]
+              .filter(Boolean)
+              .some((val) => val.toLowerCase().includes(normalized)),
+          )
+          .slice(0, 6);
+        setMatches(fallback);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [debouncedQuery]);
+
+  const showResults = isFocused && Boolean(debouncedQuery);
 
   const openProduct = (product) => {
     setQuery("");
@@ -80,7 +123,11 @@ export default function ProductSearch({
           aria-label="Matching products"
           className="absolute inset-x-0 top-full z-[80] mt-2 max-h-[min(70vh,28rem)] overflow-y-auto rounded-xl border border-border bg-background p-2 shadow-custom"
         >
-          {matches.length ? (
+          {loading ? (
+            <p className="px-3 py-4 text-center text-xs text-foreground-secondary">
+              Searching...
+            </p>
+          ) : matches.length ? (
             <ul className="space-y-1">
               {matches.map((product) => (
                 <li key={product.id}>
@@ -105,7 +152,7 @@ export default function ProductSearch({
                         {product.name}
                       </span>
                       <span className="mt-0.5 block text-xs text-foreground-secondary">
-                        {product.rating} ★ · {product.reviews} reviews
+                        {product.rating} ★ · {product.reviews || product.reviews_count || 0} reviews
                       </span>
                     </span>
                     <span className="shrink-0 text-xs font-semibold text-foreground">

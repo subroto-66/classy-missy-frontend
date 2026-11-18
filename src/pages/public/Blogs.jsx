@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FiBookOpen } from "react-icons/fi";
 import { useSearchParams } from "react-router";
 import BlogCard from "../../components/public/BlogCard";
@@ -6,17 +6,10 @@ import ProductPagination from "../../components/public/ProductPagination";
 import SortDropdown from "../../components/public/SortDropdown";
 import Container from "../../components/layouts/Container";
 import PageBanner from "../../components/shared/PageBanner";
-import blogs from "../../data/blogs";
+import blogsMock from "../../data/blogs";
+import api from "../../lib/axios";
 
 const PAGE_SIZE = 6;
-
-const topicOptions = [
-  { value: "all", label: "All topics" },
-  ...Array.from(new Set(blogs.map((blog) => blog.category))).map((category) => ({
-    value: category,
-    label: category,
-  })),
-];
 
 function getPositiveInteger(value, fallback = 1) {
   const number = Number(value);
@@ -24,7 +17,32 @@ function getPositiveInteger(value, fallback = 1) {
 }
 
 export default function Blogs() {
+  const [blogsList, setBlogsList] = useState(blogsMock);
   const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    let active = true;
+    api.get("/blogs")
+      .then((res) => {
+        if (active && res.data?.data && res.data.data.length > 0) {
+          setBlogsList(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const topicOptions = useMemo(() => {
+    const cats = Array.from(new Set(blogsList.map((blog) => blog.category)));
+    return [
+      { value: "all", label: "All topics" },
+      ...cats.map((category) => ({ value: category, label: category })),
+    ];
+  }, [blogsList]);
+
   const selectedTopic = topicOptions.some(
     ({ value }) => value === searchParams.get("topic"),
   )
@@ -34,9 +52,9 @@ export default function Blogs() {
   const filteredBlogs = useMemo(
     () =>
       selectedTopic === "all"
-        ? blogs
-        : blogs.filter((blog) => blog.category === selectedTopic),
-    [selectedTopic],
+        ? blogsList
+        : blogsList.filter((blog) => blog.category === selectedTopic),
+    [blogsList, selectedTopic],
   );
 
   const pageCount = Math.ceil(filteredBlogs.length / PAGE_SIZE);
@@ -44,12 +62,15 @@ export default function Blogs() {
     getPositiveInteger(searchParams.get("page")),
     Math.max(pageCount, 1),
   );
-  const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const visibleBlogs = filteredBlogs.slice(startIndex, startIndex + PAGE_SIZE);
-  const rangeStart = filteredBlogs.length ? startIndex + 1 : 0;
-  const rangeEnd = Math.min(startIndex + PAGE_SIZE, filteredBlogs.length);
+  const firstBlog = (currentPage - 1) * PAGE_SIZE;
+  const visibleBlogs = filteredBlogs.slice(
+    firstBlog,
+    firstBlog + PAGE_SIZE,
+  );
+  const rangeStart = filteredBlogs.length ? firstBlog + 1 : 0;
+  const rangeEnd = Math.min(firstBlog + PAGE_SIZE, filteredBlogs.length);
 
-  const updateTopic = (topic) => {
+  const setTopic = (topic) => {
     setSearchParams((current) => {
       const next = new URLSearchParams(current);
       if (topic === "all") next.delete("topic");
@@ -63,59 +84,61 @@ export default function Blogs() {
     <section className="py-5 sm:py-8 lg:py-10">
       <Container className="space-y-7 sm:space-y-9">
         <PageBanner
-          eyebrow="The Classy Missy journal"
-          title="A little more skincare know-how"
-          description="Straightforward guides, ingredient notes, and gentle reminders for building a routine that feels right for you."
-          image="https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=1400&q=85"
-          alt="Skincare products arranged on a bright vanity"
+          eyebrow="Classy Missy journal"
+          title="Skincare notes & guides"
+          description="Straightforward advice, ingredient spotlights, and routine ideas to help you feel confident in your skincare choices."
+          image={blogsList[0]?.image || blogsMock[0].image}
+          alt=""
         />
 
-        <div>
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-background-secondary text-foreground">
-                <FiBookOpen size={18} aria-hidden="true" />
-              </span>
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">
-                  Latest articles
-                </h2>
-                <p className="mt-1 text-sm text-foreground-secondary">
-                  Showing {rangeStart}–{rangeEnd} of {filteredBlogs.length}{" "}
-                  {filteredBlogs.length === 1 ? "blog" : "blogs"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-foreground-secondary">Filter</span>
-              <SortDropdown
-                value={selectedTopic}
-                onChange={updateTopic}
-                options={topicOptions}
-                ariaLabel="Filter blogs by topic"
-                optionsId="blog-topic-options"
-              />
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+          <p className="text-sm text-foreground-secondary">
+            Showing {rangeStart}–{rangeEnd} of {filteredBlogs.length} articles
+          </p>
 
-          {visibleBlogs.length ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {visibleBlogs.map((blog) => (
-                <BlogCard key={blog.title} blog={blog} />
-              ))}
-            </div>
-          ) : (
-            <p className="rounded-2xl border border-dashed border-border py-12 text-center text-sm text-foreground-secondary">
-              No articles found for this topic.
-            </p>
-          )}
-
-          <ProductPagination
-            currentPage={currentPage}
-            totalPages={pageCount}
-            ariaLabel="Blog pages"
+          <SortDropdown
+            label="Topic"
+            value={selectedTopic}
+            onChange={setTopic}
+            options={topicOptions}
           />
         </div>
+
+        {visibleBlogs.length ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleBlogs.map((blog) => (
+              <BlogCard key={blog.slug || blog.title} blog={blog} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border bg-background-secondary px-5 py-14 text-center">
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-background text-foreground-secondary">
+              <FiBookOpen size={24} aria-hidden="true" />
+            </span>
+            <h2 className="mt-4 text-lg font-semibold text-foreground">
+              No articles found
+            </h2>
+            <p className="mt-2 text-sm text-foreground-secondary">
+              Try picking another topic above to explore more articles.
+            </p>
+          </div>
+        )}
+
+        {pageCount > 1 && (
+          <div className="flex justify-center pt-4">
+            <ProductPagination
+              currentPage={currentPage}
+              pageCount={pageCount}
+              onPageChange={(nextPage) => {
+                setSearchParams((current) => {
+                  const next = new URLSearchParams(current);
+                  next.set("page", String(nextPage));
+                  return next;
+                });
+              }}
+            />
+          </div>
+        )}
       </Container>
     </section>
   );

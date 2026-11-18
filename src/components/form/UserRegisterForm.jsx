@@ -1,19 +1,18 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
-import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import { showApiErrorToast } from "../../utils/apiErrorToast";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
 import SectionSubTitle from "../typo/SectionSubTitle";
 import CustomLink from "../ui/CustomLink";
-
-
+import { useAuth } from "../../context/AuthContext";
 
 export default function UserRegisterForm() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register: registerUser } = useAuth();
 
   const {
     register,
@@ -24,11 +23,9 @@ export default function UserRegisterForm() {
   const onSubmit = async (data) => {
     try {
       setLoading(true);
-
-      await api.post("/register", data);
-
-    //   toast.success("Account Created");
-    //   navigate("/user-dashboard");
+      await registerUser(data);
+      toast.success("Account created successfully!");
+      navigate("/dashboard");
     } catch (error) {
       showApiErrorToast(error);
     } finally {

@@ -9,6 +9,7 @@ import Button from "../ui/Button";
 import { Navigation } from "./Navigation";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
+import { useAuth } from "../../context/AuthContext";
 import ProductSearch from "./ProductSearch";
 import CartDrawer from "./CartDrawer";
 
@@ -18,6 +19,7 @@ export default function Header() {
   const [cartOpen, setCartOpen] = useState(false);
   const { items } = useCart();
   const { items: wishlistItems } = useWishlist();
+  const { user, isAuthenticated } = useAuth();
   const cartCount = items.reduce((count, item) => count + item.quantity, 0);
   const closeCart = useCallback(() => setCartOpen(false), []);
 
@@ -91,12 +93,21 @@ export default function Header() {
                 </span>
                 <span className="hidden sm:inline">Cart</span>
               </Button>
-              <Link
-                to="/login"
-                className="hidden px-2 text-sm font-medium text-foreground transition-colors hover:text-foreground-secondary sm:inline-flex"
-              >
-                Sign in
-              </Link>
+              {isAuthenticated ? (
+                <Link
+                  to="/dashboard"
+                  className="hidden items-center gap-2 px-2 text-sm font-medium text-foreground transition-colors hover:text-foreground-secondary sm:inline-flex"
+                >
+                  <span className="max-w-[120px] truncate">{user?.name?.split(" ")[0] || "Account"}</span>
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  className="hidden px-2 text-sm font-medium text-foreground transition-colors hover:text-foreground-secondary sm:inline-flex"
+                >
+                  Sign in
+                </Link>
+              )}
               <button
                 type="button"
                 aria-label={sidebarOpen ? "Close menu" : "Open menu"}
@@ -157,13 +168,23 @@ export default function Header() {
               </div>
               <Navigation mobile onNavigate={() => setSidebarOpen(false)} />
               <div className="mt-auto border-t border-border pt-5">
-                <Link
-                  to="/login"
-                  onClick={() => setSidebarOpen(false)}
-                  className="mt-4 flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-foreground transition-colors hover:bg-background-custom"
-                >
-                  Sign in
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setSidebarOpen(false)}
+                    className="mt-4 flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-foreground transition-colors hover:bg-background-custom"
+                  >
+                    Dashboard ({user?.name || "Account"})
+                  </Link>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setSidebarOpen(false)}
+                    className="mt-4 flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-foreground transition-colors hover:bg-background-custom"
+                  >
+                    Sign in
+                  </Link>
+                )}
               </div>
             </aside>
           </div>,
