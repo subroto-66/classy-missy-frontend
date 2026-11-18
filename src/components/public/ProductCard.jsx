@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { FiCheck, FiHeart } from "react-icons/fi";
 import { FaStar } from "react-icons/fa";
 import { PiShoppingCartBold } from "react-icons/pi";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import Button from "../ui/Button";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
@@ -11,6 +11,7 @@ import { formatProductPrice, getProductSlug } from "../../lib/productUtils";
 export default function ProductCard({ product }) {
   const [justAdded, setJustAdded] = useState(false);
   const addedTimeout = useRef(null);
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const isFavorite = isWishlisted(product.id);
@@ -18,11 +19,20 @@ export default function ProductCard({ product }) {
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : null;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     addToCart(product);
     setJustAdded(true);
     window.clearTimeout(addedTimeout.current);
     addedTimeout.current = window.setTimeout(() => setJustAdded(false), 1400);
+  };
+
+  const handleBuyNow = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
+    navigate("/cart");
   };
 
   useEffect(
@@ -101,30 +111,38 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        <Button
-          type="button"
-          onClick={handleAddToCart}
-          aria-live="polite"
-          className={`pointer-events-auto mt-4 min-h-10 w-full rounded-lg text-xs font-semibold uppercase tracking-[0.08em] transition-all duration-300 ${
-            justAdded ? "bg-emerald-600 text-white hover:bg-emerald-600" : ""
-          }`}
-        >
-          {justAdded ? (
-            <>
+        <div className="mt-4 flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAddToCart}
+            aria-label={justAdded ? "Added to cart" : "Add to cart"}
+            title={justAdded ? "Added to cart" : "Add to cart"}
+            className={`pointer-events-auto h-11 w-12 sm:w-14 shrink-0 rounded-lg p-0 transition-all duration-300 ${
+              justAdded
+                ? "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-600"
+                : "border-border bg-background text-foreground hover:bg-foreground hover:text-background"
+            }`}
+          >
+            {justAdded ? (
               <FiCheck
-                size={17}
+                size={28}
                 aria-hidden="true"
                 className="animate-[cart-check_300ms_ease-out]"
               />
-              Added
-            </>
-          ) : (
-            <>
-              <PiShoppingCartBold size={16} aria-hidden="true" />
-              Add to cart
-            </>
-          )}
-        </Button>
+            ) : (
+              <PiShoppingCartBold size={30} aria-hidden="true" />
+            )}
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleBuyNow}
+            className="pointer-events-auto min-h-11 flex-1 rounded-lg text-xs font-semibold uppercase tracking-[0.08em]"
+          >
+            Buy now
+          </Button>
+        </div>
       </div>
     </article>
   );

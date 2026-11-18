@@ -1,18 +1,44 @@
-import { FiHeart } from "react-icons/fi";
+import { useRef, useState, useEffect } from "react";
+import { FiCheck, FiHeart } from "react-icons/fi";
 import { FaStar } from "react-icons/fa";
-import { Link } from "react-router";
+import { PiShoppingCartBold } from "react-icons/pi";
+import { Link, useNavigate } from "react-router";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { formatProductPrice, getProductSlug } from "../../lib/productUtils";
 import Button from "../ui/Button";
 
 export default function ProductListCard({ product }) {
+  const [justAdded, setJustAdded] = useState(false);
+  const addedTimeout = useRef(null);
+  const navigate = useNavigate();
   const discount = product.oldPrice
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : null;
   const { addToCart } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const isFavorite = isWishlisted(product.id);
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
+    setJustAdded(true);
+    window.clearTimeout(addedTimeout.current);
+    addedTimeout.current = window.setTimeout(() => setJustAdded(false), 1400);
+  };
+
+  const handleBuyNow = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
+    navigate("/cart");
+  };
+
+  useEffect(
+    () => () => window.clearTimeout(addedTimeout.current),
+    [],
+  );
 
   return (
     <article className="group relative grid overflow-hidden rounded-xl border border-border bg-background-secondary transition hover:shadow-custom sm:grid-cols-[minmax(160px,0.8fr)_1.6fr]">
@@ -56,7 +82,7 @@ export default function ProductListCard({ product }) {
             }
             aria-pressed={isFavorite}
             onClick={() => toggleWishlist(product)}
-            className="pointer-events-auto  shrink-0 rounded-full border border-border "
+            className="pointer-events-auto shrink-0 rounded-full border border-border"
           >
             <FiHeart
               size={16}
@@ -77,22 +103,46 @@ export default function ProductListCard({ product }) {
         </p>
         <div className="mt-auto flex w-full flex-wrap items-center justify-between gap-3 pt-5">
           <div className="mt-3 flex min-h-6 flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="text-sm font-semibold text-foreground sm:text-base">
-            {formatProductPrice(product.price)}
-          </span>
-          {product.oldPrice && (
-            <span className="text-xs text-foreground-secondary line-through">
-              {formatProductPrice(product.oldPrice)}
+            <span className="text-sm font-semibold text-foreground sm:text-base">
+              {formatProductPrice(product.price)}
             </span>
-          )}
-        </div>
-          <Button
-            type="button"
-            onClick={() => addToCart(product)}
-            className="pointer-events-auto rounded-lg px-4 py-2.5 text-xs font-semibold"
-          >
-            Add to cart
-          </Button>
+            {product.oldPrice && (
+              <span className="text-xs text-foreground-secondary line-through">
+                {formatProductPrice(product.oldPrice)}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddToCart}
+              aria-label={justAdded ? "Added to cart" : "Add to cart"}
+              title={justAdded ? "Added to cart" : "Add to cart"}
+              className={`pointer-events-auto h-11 w-12 sm:w-14 shrink-0 rounded-lg p-0 transition-all duration-300 ${
+                justAdded
+                  ? "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-600"
+                  : "border-border bg-background text-foreground hover:bg-foreground hover:text-background"
+              }`}
+            >
+              {justAdded ? (
+                <FiCheck
+                  size={28}
+                  aria-hidden="true"
+                  className="animate-[cart-check_300ms_ease-out]"
+                />
+              ) : (
+                <PiShoppingCartBold size={30} aria-hidden="true" />
+              )}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleBuyNow}
+              className="pointer-events-auto min-h-11 rounded-lg px-5 text-xs font-semibold uppercase tracking-[0.08em]"
+            >
+              Buy now
+            </Button>
+          </div>
         </div>
       </div>
     </article>
