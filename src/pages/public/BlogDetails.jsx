@@ -4,6 +4,7 @@ import {
   FiBookOpen,
   FiCheck,
   FiClock,
+  FiShare2,
   FiTag,
 } from "react-icons/fi";
 import { Link, useParams } from "react-router";
@@ -11,17 +12,19 @@ import BlogCard from "../../components/public/BlogCard";
 import Container from "../../components/layouts/Container";
 import blogsMock, { getBlogDetails, getBlogSlug } from "../../data/blogs";
 import api from "../../lib/axios";
+import toast from "react-hot-toast";
 
 function formatDate(value) {
   if (!value) return "";
   try {
+    const dateStr = String(value).includes("T") ? value : `${value}T00:00:00`;
     return new Intl.DateTimeFormat("en", {
       month: "long",
       day: "numeric",
       year: "numeric",
-    }).format(new Date(`${value}T00:00:00`));
+    }).format(new Date(dateStr));
   } catch {
-    return value;
+    return String(value);
   }
 }
 
@@ -37,12 +40,16 @@ function getSectionId(heading) {
 export default function BlogDetails() {
   const { blogSlug } = useParams();
   const [blog, setBlog] = useState(() => {
-    return blogsMock.find((item) => getBlogSlug(item) === blogSlug || item.slug === blogSlug);
+    return blogsMock.find(
+      (item) => getBlogSlug(item) === blogSlug || item.slug === blogSlug,
+    );
   });
   const [loading, setLoading] = useState(!blog);
 
   useEffect(() => {
     let active = true;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     api.get(`/blogs/${blogSlug}`)
       .then((res) => {
         if (!active) return;
@@ -50,7 +57,9 @@ export default function BlogDetails() {
           setBlog(res.data.data);
         }
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error("Failed to load blog:", err);
+      })
       .finally(() => {
         if (active) setLoading(false);
       });
@@ -60,10 +69,35 @@ export default function BlogDetails() {
     };
   }, [blogSlug]);
 
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: blog?.title,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Article link copied to clipboard!");
+      }
+    } catch {
+      // User cancelled share
+    }
+  };
+
   if (loading) {
     return (
-      <Container className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-foreground-secondary">Loading article...</p>
+      <Container className="py-16">
+        <div className="space-y-6 max-w-3xl mx-auto animate-pulse">
+          <div className="h-4 w-32 rounded bg-background-secondary" />
+          <div className="h-10 w-4/5 rounded bg-background-secondary" />
+          <div className="aspect-[16/9] w-full rounded-2xl bg-background-secondary" />
+          <div className="space-y-3 pt-6">
+            <div className="h-4 w-full rounded bg-background-secondary" />
+            <div className="h-4 w-5/6 rounded bg-background-secondary" />
+            <div className="h-4 w-3/4 rounded bg-background-secondary" />
+          </div>
+        </div>
       </Container>
     );
   }
@@ -73,7 +107,7 @@ export default function BlogDetails() {
       <Container className="flex min-h-[60vh] flex-col items-center justify-center text-center">
         <p className="text-sm text-foreground-secondary">Article not found</p>
         <h1 className="mt-2 text-2xl font-semibold text-foreground">
-          We could not find that blog.
+          We could not find that article.
         </h1>
         <Link
           to="/blogs"
@@ -87,16 +121,35 @@ export default function BlogDetails() {
   }
 
   const details = blog.sections?.length
-    ? { intro: blog.intro || blog.excerpt, sections: blog.sections, keyTakeaways: blog.keyTakeaways || blog.key_takeaways || [] }
+    ? {
+        intro: blog.intro || blog.excerpt,
+        sections: blog.sections,
+        keyTakeaways: blog.keyTakeaways || blog.key_takeaways || [],
+      }
     : getBlogDetails(blog);
 
-  const relatedBlogs = blogsMock
-    .filter((item) => item.category === blog.category && (item.slug || getBlogSlug(item)) !== (blog.slug || getBlogSlug(blog)))
-    .slice(0, 3);
+  const relatedBlogs =
+    blog.relatedBlogs ||
+    blog.related_blogs ||
+    blogsMock
+      .filter(
+        (item) =>
+          item.category === blog.category &&
+          (item.slug || getBlogSlug(item)) !== (blog.slug || getBlogSlug(blog)),
+      )
+      .slice(0, 3);
+
+  const publishedDate = blog.publishedAt || blog.published_at;
+  const readTime = blog.readTime || blog.read_time || "5 min read";
+  const image =
+    blog.image ||
+    "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=1200&q=85";
+  const imageAlt = blog.imageAlt || blog.image_alt || blog.title;
 
   return (
     <article className="py-5 sm:py-8 lg:py-10">
       <Container className="space-y-7 sm:space-y-9">
+        {/* Breadcrumb */}
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-2 text-xs text-foreground-secondary">
             <li>
@@ -120,59 +173,76 @@ export default function BlogDetails() {
           </ol>
         </nav>
 
-        <header className="grid overflow-hidden rounded-3xl border border-border bg-background-secondary lg:min-h-[380px] lg:grid-cols-[1.05fr_0.95fr]">
+        {/* Hero Header */}
+        <header className="grid overflow-hidden rounded-3xl border border-border bg-background-secondary lg:min-h-[380px] lg:grid-cols-[1.1fr_0.9fr]">
           <div className="flex flex-col justify-center p-6 sm:p-9 lg:p-12">
-            <Link
-              to="/blogs"
-              className="mb-8 inline-flex w-fit items-center gap-2 text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground"
-            >
-              <FiArrowLeft size={14} aria-hidden="true" />
-              All articles
-            </Link>
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <Link
+                to="/blogs"
+                className="inline-flex items-center gap-2 text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground"
+              >
+                <FiArrowLeft size={14} aria-hidden="true" />
+                All articles
+              </Link>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="inline-flex items-center gap-1.5 text-xs text-foreground-secondary hover:text-foreground transition-colors"
+                title="Share article"
+              >
+                <FiShare2 size={13} />
+                <span>Share</span>
+              </button>
+            </div>
+
             <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-foreground-secondary">
               <FiTag size={12} aria-hidden="true" />
               {blog.category}
             </span>
-            <h1 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl xl:text-[2.75rem]">
+            <h1 className="mt-5 text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl xl:text-4xl">
               {blog.title}
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-6 text-foreground-secondary sm:text-base sm:leading-7">
               {blog.excerpt}
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-5 text-xs text-foreground-secondary">
-              <time dateTime={blog.publishedAt}>
-                {formatDate(blog.publishedAt)}
-              </time>
+              {publishedDate && (
+                <time dateTime={publishedDate}>
+                  {formatDate(publishedDate)}
+                </time>
+              )}
               <span aria-hidden="true">·</span>
               <span className="inline-flex items-center gap-1.5">
                 <FiClock size={13} aria-hidden="true" />
-                {blog.readTime}
+                {readTime}
               </span>
               <span aria-hidden="true">·</span>
               <span>Classy Missy Editorial</span>
             </div>
           </div>
+
+          <div className="relative aspect-[16/10] overflow-hidden bg-background-custom lg:aspect-auto">
+            <img
+              src={image}
+              alt={imageAlt}
+              className="h-full w-full object-cover"
+            />
+          </div>
         </header>
 
-        <div className=" grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_270px] lg:gap-12">
+        {/* Content Body & Sidebar */}
+        <div className="grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_270px] lg:gap-12">
           <div className="min-w-0">
-            <div className="mb-7 rounded-2xl border-l-4 border-foreground bg-background-secondary/70 px-5 py-5 sm:px-7">
-              <p className="text-base leading-7 text-foreground sm:text-lg sm:leading-8">
-                {details.intro}
-              </p>
-            </div>
-
-            <figure className="mx-auto mb-8 aspect-video max-w-xl overflow-hidden rounded-2xl border border-border bg-background-secondary">
-              <img
-                src={blog.image}
-                alt={blog.imageAlt}
-                className=" w-full h-full object-cover"
-                loading="lazy"
-              />
-            </figure>
+            {details.intro && (
+              <div className="mb-7 rounded-2xl border-l-4 border-foreground bg-background-secondary/70 px-5 py-5 sm:px-7">
+                <p className="text-base leading-7 text-foreground sm:text-lg sm:leading-8">
+                  {details.intro}
+                </p>
+              </div>
+            )}
 
             <div className="space-y-9 sm:space-y-11">
-              {details.sections.map((section, index) => {
+              {details.sections?.map((section, index) => {
                 const sectionId = getSectionId(section.heading);
                 return (
                   <section
@@ -193,7 +263,7 @@ export default function BlogDetails() {
                       </h2>
                     </div>
                     <div className="space-y-4 pl-11">
-                      {section.paragraphs.map((paragraph, paragraphIndex) => (
+                      {section.paragraphs?.map((paragraph, paragraphIndex) => (
                         <p
                           key={`${sectionId}-${paragraphIndex}`}
                           className="text-sm leading-7 text-foreground-secondary sm:text-base sm:leading-8"
@@ -224,29 +294,65 @@ export default function BlogDetails() {
               })}
             </div>
 
-            <div className="mt-9 rounded-2xl border border-border p-5 sm:mt-12 sm:p-7">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-secondary">
-                In a nutshell
-              </p>
-              <h2 className="mt-1 text-lg font-semibold text-foreground">
-                Key takeaways
-              </h2>
-              <ul className="mt-4 space-y-3">
-                {details.keyTakeaways.map((takeaway) => (
-                  <li
-                    key={takeaway}
-                    className="flex items-start gap-2.5 text-sm leading-6 text-foreground-secondary"
+            {/* Key Takeaways */}
+            {details.keyTakeaways?.length > 0 && (
+              <div className="mt-9 rounded-2xl border border-border bg-background-secondary/50 p-5 sm:mt-12 sm:p-7">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-secondary">
+                  In a nutshell
+                </p>
+                <h2 className="mt-1 text-lg font-semibold text-foreground">
+                  Key takeaways
+                </h2>
+                <ul className="mt-4 space-y-3">
+                  {details.keyTakeaways.map((takeaway) => (
+                    <li
+                      key={takeaway}
+                      className="flex items-start gap-2.5 text-sm leading-6 text-foreground-secondary"
+                    >
+                      <FiCheck
+                        size={16}
+                        className="mt-1 shrink-0 text-emerald-600"
+                        aria-hidden="true"
+                      />
+                      <span>{takeaway}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Next / Previous article navigation */}
+            {(blog.prevBlog || blog.prev_blog || blog.nextBlog || blog.next_blog) && (
+              <div className="mt-10 grid gap-4 border-t border-border pt-8 sm:grid-cols-2">
+                {blog.prevBlog || blog.prev_blog ? (
+                  <Link
+                    to={`/blog/${(blog.prevBlog || blog.prev_blog).slug}`}
+                    className="group flex flex-col rounded-xl border border-border p-4 transition hover:bg-background-secondary"
                   >
-                    <FiCheck
-                      size={16}
-                      className="mt-1 shrink-0 text-foreground"
-                      aria-hidden="true"
-                    />
-                    <span>{takeaway}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-secondary">
+                      ← Previous Article
+                    </span>
+                    <span className="mt-1.5 text-sm font-medium text-foreground group-hover:underline line-clamp-1">
+                      {(blog.prevBlog || blog.prev_blog).title}
+                    </span>
+                  </Link>
+                ) : <div />}
+
+                {blog.nextBlog || blog.next_blog ? (
+                  <Link
+                    to={`/blog/${(blog.nextBlog || blog.next_blog).slug}`}
+                    className="group flex flex-col items-end text-right rounded-xl border border-border p-4 transition hover:bg-background-secondary"
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-secondary">
+                      Next Article →
+                    </span>
+                    <span className="mt-1.5 text-sm font-medium text-foreground group-hover:underline line-clamp-1">
+                      {(blog.nextBlog || blog.next_blog).title}
+                    </span>
+                  </Link>
+                ) : <div />}
+              </div>
+            )}
 
             <p className="mt-7 border-t border-border pt-5 text-xs leading-5 text-foreground-secondary">
               This article is for general informational purposes and is not a
@@ -255,33 +361,36 @@ export default function BlogDetails() {
             </p>
           </div>
 
+          {/* Sticky Sidebar */}
           <aside className="space-y-4 lg:sticky lg:top-28">
-            <nav
-              aria-label="In this article"
-              className="rounded-2xl border border-border bg-background p-5"
-            >
-              <div className="flex items-center gap-2">
-                <FiBookOpen size={16} aria-hidden="true" />
-                <h2 className="text-sm font-semibold text-foreground">
-                  In this article
-                </h2>
-              </div>
-              <ol className="mt-4 space-y-1">
-                {details.sections.map((section, index) => (
-                  <li key={section.heading}>
-                    <a
-                      href={`#${getSectionId(section.heading)}`}
-                      className="flex gap-2 rounded-lg px-2.5 py-2 text-xs leading-5 text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
-                    >
-                      <span className="shrink-0 tabular-nums">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <span>{section.heading}</span>
-                    </a>
-                  </li>
-                ))}
-              </ol>
-            </nav>
+            {details.sections?.length > 0 && (
+              <nav
+                aria-label="In this article"
+                className="rounded-2xl border border-border bg-background p-5"
+              >
+                <div className="flex items-center gap-2">
+                  <FiBookOpen size={16} aria-hidden="true" />
+                  <h2 className="text-sm font-semibold text-foreground">
+                    In this article
+                  </h2>
+                </div>
+                <ol className="mt-4 space-y-1">
+                  {details.sections.map((section, index) => (
+                    <li key={section.heading}>
+                      <a
+                        href={`#${getSectionId(section.heading)}`}
+                        className="flex gap-2 rounded-lg px-2.5 py-2 text-xs leading-5 text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
+                      >
+                        <span className="shrink-0 tabular-nums">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <span>{section.heading}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
 
             <div className="rounded-2xl bg-foreground p-5 text-background">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-background/65">
@@ -295,6 +404,7 @@ export default function BlogDetails() {
           </aside>
         </div>
 
+        {/* Related Blogs Section */}
         {relatedBlogs.length > 0 && (
           <section aria-labelledby="related-blogs-title" className="space-y-5">
             <div className="border-t border-border pt-7 sm:pt-9">
@@ -310,7 +420,7 @@ export default function BlogDetails() {
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {relatedBlogs.map((item) => (
-                <BlogCard key={item.title} blog={item} />
+                <BlogCard key={item.id || item.slug || item.title} blog={item} />
               ))}
             </div>
           </section>

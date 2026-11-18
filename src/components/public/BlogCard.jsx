@@ -3,15 +3,30 @@ import { Link } from "react-router";
 import { getBlogSlug } from "../../data/blogs";
 
 function formatDate(value) {
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(`${value}T00:00:00`));
+  if (!value) return "";
+  try {
+    const dateStr = String(value).includes("T") ? value : `${value}T00:00:00`;
+    return new Intl.DateTimeFormat("en", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(dateStr));
+  } catch {
+    return String(value);
+  }
 }
 
 export default function BlogCard({ blog }) {
-  const blogPath = `/blog/${getBlogSlug(blog)}`;
+  if (!blog) return null;
+
+  const slug = blog.slug || getBlogSlug(blog);
+  const blogPath = `/blog/${slug}`;
+  const publishedDate = blog.publishedAt || blog.published_at;
+  const readTime = blog.readTime || blog.read_time || "5 min read";
+  const image =
+    blog.image ||
+    "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=1200&q=85";
+  const imageAlt = blog.imageAlt || blog.image_alt || blog.title;
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-custom">
@@ -21,8 +36,8 @@ export default function BlogCard({ blog }) {
         className="block aspect-[16/10] overflow-hidden bg-background-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground"
       >
         <img
-          src={blog.image}
-          alt={blog.imageAlt}
+          src={image}
+          alt={imageAlt}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -34,12 +49,14 @@ export default function BlogCard({ blog }) {
           </span>
           <span className="inline-flex items-center gap-1 text-[11px] text-foreground-secondary">
             <FiClock size={12} aria-hidden="true" />
-            {blog.readTime}
+            {readTime}
           </span>
         </div>
-        <p className="mt-3 text-[11px] text-foreground-secondary">
-          {formatDate(blog.publishedAt)}
-        </p>
+        {publishedDate && (
+          <p className="mt-3 text-[11px] text-foreground-secondary">
+            {formatDate(publishedDate)}
+          </p>
+        )}
         <h2 className="mt-1.5 line-clamp-2 text-base font-semibold leading-6 text-foreground sm:text-lg">
           <Link to={blogPath} className="transition-colors hover:text-foreground-secondary">
             {blog.title}
