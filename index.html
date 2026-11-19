@@ -5,6 +5,26 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>classy-missy</title>
+    <script>
+      (function() {
+        try {
+          var color = localStorage.getItem('cm_primary_color');
+          if (color && /^#([0-9a-fA-F]{3}){1,2}$/.test(color)) {
+            var hex = color.replace('#', '');
+            if (hex.length === 3) hex = hex.split('').map(function(c) { return c + c; }).join('');
+            var r = parseInt(hex.substring(0, 2), 16) || 0;
+            var g = parseInt(hex.substring(2, 4), 16) || 0;
+            var b = parseInt(hex.substring(4, 6), 16) || 0;
+            var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            var fg = yiq >= 150 ? '#111111' : '#ffffff';
+            document.documentElement.style.setProperty('--primary', color);
+            document.documentElement.style.setProperty('--color-primary', color);
+            document.documentElement.style.setProperty('--primary-foreground', fg);
+            document.documentElement.style.setProperty('--color-primary-foreground', fg);
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -67,12 +67,12 @@ export default function Coupons() {
               key={coupon.code}
               className="relative flex min-h-64 overflow-hidden rounded-2xl border border-border bg-background shadow-sm"
             >
-              <div className="flex w-[34%] shrink-0 flex-col items-center justify-center bg-foreground px-3 text-center text-background">
+              <div className="flex w-[34%] shrink-0 flex-col items-center justify-center bg-primary px-3 text-center text-primary-foreground">
                 <FiTag size={20} aria-hidden="true" />
                 <p className="mt-3 text-xl font-semibold leading-tight">
                   {coupon.offer}
                 </p>
-                <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-background/65">
+                <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-primary-foreground/75">
                   Offer
                 </p>
               </div>

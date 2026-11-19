@@ -132,7 +132,7 @@ export default function ProfileSettings() {
           <Button
             type="submit"
             loading={loading}
-            className="rounded-lg bg-black text-white hover:bg-neutral-800"
+            className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs"
           >
             Save changes
           </Button>

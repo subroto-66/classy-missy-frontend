@@ -33,7 +33,7 @@ export default function FindByProblem({ image, problems }) {
             type="button"
             aria-label="Previous problems"
             onClick={() => swiperRef.current?.slidePrev()}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-foreground hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-primary hover:text-primary-foreground hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <FiChevronLeft size={18} aria-hidden="true" />
           </button>
@@ -41,7 +41,7 @@ export default function FindByProblem({ image, problems }) {
             type="button"
             aria-label="Next problems"
             onClick={() => swiperRef.current?.slideNext()}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-foreground hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-primary hover:text-primary-foreground hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <FiChevronRight size={18} aria-hidden="true" />
           </button>
@@ -103,7 +103,7 @@ export default function FindByProblem({ image, problems }) {
               <SwiperSlide key={title}>
                 <Link
                   to={`/products?problem=${encodeURIComponent(label)}`}
-                  className="group relative flex h-full min-h-[104px] items-center gap-3 overflow-hidden rounded-xl border border-border bg-background p-3 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-custom sm:gap-4 sm:p-3.5"
+                  className="group relative flex h-full min-h-[104px] items-center gap-3 overflow-hidden rounded-xl border border-border bg-background p-3 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-custom sm:gap-4 sm:p-3.5"
                 >
                   <span className="absolute right-3 top-2 text-[10px] font-medium tabular-nums text-foreground-secondary/60">
                     {String(index + 1).padStart(2, "0")}
@@ -123,13 +123,13 @@ export default function FindByProblem({ image, problems }) {
                     <span className="mt-1.5 block text-sm font-semibold leading-snug text-foreground">
                       {title}
                     </span>
-                    <span className="mt-1 inline-flex items-center gap-1.5 text-[11px] text-foreground-secondary transition-colors group-hover:text-foreground">
+                    <span className="mt-1 inline-flex items-center gap-1.5 text-[11px] text-foreground-secondary transition-colors group-hover:text-primary">
                       {solutions}
-                      <span className="font-medium text-foreground">Explore</span>
+                      <span className="font-medium text-foreground group-hover:text-primary">Explore</span>
                       <FiArrowRight
                         size={13}
                         aria-hidden="true"
-                        className="transition-transform group-hover:translate-x-0.5"
+                        className="transition-transform group-hover:translate-x-0.5 text-primary"
                       />
                     </span>
                   </span>

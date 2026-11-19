@@ -28,7 +28,7 @@ export default function ProductCompactCard({ product }) {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product);
-    navigate("/cart");
+    navigate("/checkout");
   };
 
   useEffect(
@@ -94,7 +94,7 @@ export default function ProductCompactCard({ product }) {
             aria-label={justAdded ? "Added to cart" : "Add to cart"}
             title={justAdded ? "Added to cart" : "Add to cart"}
             onClick={handleAddToCart}
-            className={`pointer-events-auto h-9 w-10 shrink-0 rounded-md border-border bg-background p-0 text-foreground hover:bg-foreground hover:text-background transition-colors ${
+            className={`pointer-events-auto h-9 w-10 shrink-0 rounded-md border-border bg-background p-0 text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors ${
               justAdded ? "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-600" : ""
             }`}
           >

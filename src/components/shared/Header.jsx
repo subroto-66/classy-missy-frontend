@@ -63,11 +63,11 @@ export default function Header() {
                 aria-label={`Wishlist, ${wishlistItems.length} ${
                   wishlistItems.length === 1 ? "item" : "items"
                 }`}
-                className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-background-custom"
+                className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-background-custom hover:text-primary"
               >
                 <FiHeart size={20} />
                 {wishlistItems.length > 0 && (
-                  <span className="absolute right-0 top-0 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-[9px] font-semibold leading-none text-background">
+                  <span className="absolute right-0 top-0 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold leading-none text-primary-foreground shadow-xs">
                     {wishlistItems.length}
                   </span>
                 )}
@@ -81,12 +81,12 @@ export default function Header() {
                 aria-haspopup="dialog"
                 aria-expanded={cartOpen}
                 onClick={() => setCartOpen(true)}
-                className="h-10 rounded-full border-border px-3 text-foreground hover:bg-foreground hover:text-background sm:px-4"
+                className="h-10 rounded-full border-border px-3 text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary sm:px-4 transition-colors"
               >
                 <span className="relative">
                   <PiShoppingCartBold size={19} />
                   {cartCount > 0 && (
-                    <span className="absolute -right-2 -top-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-[9px] font-semibold leading-none text-background">
+                    <span className="absolute -right-2 -top-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold leading-none text-primary-foreground shadow-xs">
                       {cartCount}
                     </span>
                   )}

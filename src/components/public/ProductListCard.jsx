@@ -32,7 +32,7 @@ export default function ProductListCard({ product }) {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product);
-    navigate("/cart");
+    navigate("/checkout");
   };
 
   useEffect(
@@ -62,7 +62,7 @@ export default function ProductListCard({ product }) {
           </span>
         )}
         {discount && (
-          <span className="absolute bottom-3 left-3 rounded-full bg-foreground px-2.5 py-1 text-[10px] font-semibold tracking-wide text-background">
+          <span className="absolute bottom-3 left-3 rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold tracking-wide text-primary-foreground shadow-xs">
             -{discount}%
           </span>
         )}
@@ -86,7 +86,7 @@ export default function ProductListCard({ product }) {
           >
             <FiHeart
               size={16}
-              className={isFavorite ? "fill-foreground" : undefined}
+              className={isFavorite ? "fill-primary text-primary" : undefined}
             />
           </Button>
         </div>
@@ -122,7 +122,7 @@ export default function ProductListCard({ product }) {
               className={`pointer-events-auto h-11 w-12 sm:w-14 shrink-0 rounded-lg p-0 transition-all duration-300 ${
                 justAdded
                   ? "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-600"
-                  : "border-border bg-background text-foreground hover:bg-foreground hover:text-background"
+                  : "border-border bg-background text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary"
               }`}
             >
               {justAdded ? (

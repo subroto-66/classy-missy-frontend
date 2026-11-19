@@ -233,8 +233,8 @@ function DesktopMegaMenuItem({ item, onNavigate }) {
         <NavLink
           to={to}
           className={({ isActive }) =>
-            `relative inline-flex min-h-11 items-center px-3 text-sm font-medium transition-colors after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:origin-left after:scale-x-0 after:bg-foreground after:transition-transform after:duration-300 hover:text-foreground hover:after:scale-x-100 group-hover:after:scale-x-100 group-focus-within:after:scale-x-100 ${
-              isActive ? "text-foreground after:scale-x-100" : "text-foreground-secondary"
+            `relative inline-flex min-h-11 items-center px-3 text-sm font-medium transition-colors after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 hover:text-primary hover:after:scale-x-100 group-hover:after:scale-x-100 group-focus-within:after:scale-x-100 ${
+              isActive ? "text-primary after:scale-x-100 font-semibold" : "text-foreground-secondary"
             }`
           }
         >
@@ -243,7 +243,7 @@ function DesktopMegaMenuItem({ item, onNavigate }) {
         <FiChevronDown
           size={14}
           aria-hidden="true"
-          className="mr-3 text-foreground-secondary transition-transform group-hover:rotate-180 group-focus-within:rotate-180"
+          className="mr-3 text-foreground-secondary transition-transform group-hover:rotate-180 group-focus-within:rotate-180 group-hover:text-primary"
         />
       </div>
 
@@ -273,8 +273,8 @@ export function Navigation({ onNavigate, mobile = false }) {
             className={({ isActive }) =>
               `rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-primary text-background"
-                  : "text-foreground-secondary hover:bg-background-custom hover:text-foreground"
+                  ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                  : "text-foreground-secondary hover:bg-background-custom hover:text-primary"
               }`
             }
           >
@@ -297,8 +297,8 @@ export function Navigation({ onNavigate, mobile = false }) {
           end
           onClick={onNavigate}
           className={({ isActive }) =>
-            `group relative inline-flex min-h-11 items-center px-4 text-sm font-medium transition-colors after:absolute after:inset-x-4 after:bottom-0 after:h-0.5 after:origin-left after:scale-x-0 after:bg-foreground after:transition-transform after:duration-300 hover:text-foreground hover:after:scale-x-100 ${
-              isActive ? "text-foreground after:scale-x-100" : "text-foreground-secondary"
+            `group relative inline-flex min-h-11 items-center px-4 text-sm font-medium transition-colors after:absolute after:inset-x-4 after:bottom-0 after:h-0.5 after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 hover:text-primary hover:after:scale-x-100 ${
+              isActive ? "text-primary after:scale-x-100 font-semibold" : "text-foreground-secondary"
             }`
           }
         >
@@ -318,8 +318,8 @@ export function Navigation({ onNavigate, mobile = false }) {
           to={to}
           onClick={onNavigate}
           className={({ isActive }) =>
-            `group relative inline-flex min-h-11 items-center px-4 text-sm font-medium transition-colors after:absolute after:inset-x-4 after:bottom-0 after:h-0.5 after:origin-left after:scale-x-0 after:bg-foreground after:transition-transform after:duration-300 hover:text-foreground hover:after:scale-x-100 ${
-              isActive ? "text-foreground after:scale-x-100" : "text-foreground-secondary"
+            `group relative inline-flex min-h-11 items-center px-4 text-sm font-medium transition-colors after:absolute after:inset-x-4 after:bottom-0 after:h-0.5 after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 hover:text-primary hover:after:scale-x-100 ${
+              isActive ? "text-primary after:scale-x-100 font-semibold" : "text-foreground-secondary"
             }`
           }
         >

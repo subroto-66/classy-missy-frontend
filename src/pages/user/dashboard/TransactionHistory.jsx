@@ -101,7 +101,7 @@ export default function TransactionHistory() {
             Payment records and transaction receipts for your completed orders will be listed here.
           </p>
           <Link to="/products" className="mt-5 inline-flex">
-            <Button className="rounded-lg bg-black text-xs text-white hover:bg-neutral-800">
+            <Button className="rounded-lg bg-primary text-xs text-primary-foreground hover:bg-primary/90 shadow-xs">
               Start shopping
             </Button>
           </Link>

@@ -95,6 +95,7 @@ export default function Home() {
   const [campaignsList, setCampaignsList] = useState(campaignsMock);
   const [brandsList, setBrandsList] = useState(brandsMock);
   const [blogsList, setBlogsList] = useState(blogsMock);
+  const [slidersList, setSlidersList] = useState(slides);
 
   useEffect(() => {
     let isMounted = true;
@@ -144,10 +145,35 @@ export default function Home() {
       })
       .catch(() => {});
 
+    // Fetch Sliders
+    api.get("/sliders")
+      .then((res) => {
+        if (isMounted && res.data?.data && res.data.data.length > 0) {
+          setSlidersList(res.data.data);
+        }
+      })
+      .catch(() => {});
+
     return () => {
       isMounted = false;
     };
   }, []);
+
+  const resolveSlideImage = (img, fallback) => {
+    if (!img) return fallback;
+    if (
+      img.startsWith("http://") ||
+      img.startsWith("https://") ||
+      img.startsWith("blob:") ||
+      img.startsWith("data:")
+    ) {
+      return img;
+    }
+    const backendBase = (
+      import.meta.env.VITE_API_URL || "http://localhost:8000/api"
+    ).replace(/\/api\/?$/, "");
+    return `${backendBase}${img.startsWith("/") ? "" : "/"}${img}`;
+  };
 
   const getProductImage = (idx) => {
     return productsList[idx]?.image || productsMock[idx]?.image || productsMock[0].image;
@@ -171,6 +197,60 @@ export default function Home() {
   const onSaleProducts = productsList.filter((p) => p.oldPrice || p.old_price);
   const featuredProducts = productsList.filter((p) => p.is_featured);
 
+  // Dynamic Banners derived from campaigns table
+  const promoCampaigns = campaignsList.filter((c) => c.placement === "promo");
+  const promoList = promoCampaigns.length > 0
+    ? promoCampaigns.slice(0, 4).map((c, idx) => ({
+        id: c.id,
+        type: c.image?.endsWith(".mp4") ? "video" : "image",
+        image: resolveSlideImage(c.image, promo[idx]?.image || p2),
+        alt: c.title || c.eyebrow || `Promo ${idx + 1}`,
+        href: c.link || c.href || `/products?campaign=${c.slug}`,
+      }))
+    : promo;
+
+  const flashCampaigns = campaignsList.filter((c) => c.placement === "flash");
+  const flashBanner = flashCampaigns.length > 0
+    ? {
+        image: resolveSlideImage(flashCampaigns[0].image, flash),
+        alt: flashCampaigns[0].title || "Mega Flash Sale",
+        href: flashCampaigns[0].link || flashCampaigns[0].href || `/products?campaign=${flashCampaigns[0].slug}`,
+      }
+    : { image: flash, alt: "flash-banner", href: "/campaigns" };
+
+  const middleCampaigns = campaignsList.filter((c) => c.placement === "middle");
+  const middleBanners = middleCampaigns.length > 0
+    ? middleCampaigns.slice(0, 2).map((c, idx) => ({
+        id: c.id,
+        image: resolveSlideImage(c.image, idx === 0 ? t1 : t2),
+        alt: c.title || `Featured ${idx + 1}`,
+        href: c.link || c.href || `/products?campaign=${c.slug}`,
+      }))
+    : [
+        { id: "t1", image: t1, alt: "Fashion Banner 1", href: "/products" },
+        { id: "t2", image: t2, alt: "Fashion Banner 2", href: "/products" },
+      ];
+
+  const bottomCampaigns = campaignsList.filter((c) => c.placement === "bottom");
+  const bottomBanners = bottomCampaigns.length > 0
+    ? bottomCampaigns.slice(0, 4).map((c, idx) => ({
+        id: c.id,
+        image: resolveSlideImage(c.image, beauty[idx] || y1),
+        alt: c.title || `Beauty Showcase ${idx + 1}`,
+        href: c.link || c.href || `/products?campaign=${c.slug}`,
+      }))
+    : beauty.map((b, indx) => ({
+        id: `beauty-${indx}`,
+        image: b,
+        alt: `Beauty ${indx + 1}`,
+        href: "/brands",
+      }));
+
+  const sliderCampaigns = campaignsList.filter(
+    (c) => !c.placement || c.placement === "slider"
+  );
+  const activeSliderCampaigns = sliderCampaigns.length > 0 ? sliderCampaigns : campaignsList;
+
   return (
     <section className="py-5 sm:py-8 lg:py-10">
       <Container className={"space-y-6 md:space-y-8 lg:space-y-10"}>
@@ -185,7 +265,7 @@ export default function Home() {
             pagination={{
               clickable: true,
               renderBullet: (_, className) =>
-                `<span class="${className} !bg-foreground"></span>`,
+                `<span class="${className} !bg-primary"></span>`,
             }}
             autoplay={{
               delay: 5000,
@@ -193,22 +273,35 @@ export default function Home() {
               pauseOnMouseEnter: true,
             }}
           >
-            {slides.map(({ image, alt, href }) => (
-              <SwiperSlide key={image}>
-                <Link
-                  to={href}
-                  aria-label={`Explore: ${alt}`}
-                  className="block aspect-[7/5] overflow-hidden sm:aspect-[16/7] lg:aspect-[3/1]"
-                >
-                  <img
-                    src={image}
-                    alt={alt}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                </Link>
-              </SwiperSlide>
-            ))}
+            {slidersList.map((slide, index) => {
+              const imageSrc = resolveSlideImage(
+                slide.image,
+                slides[index % slides.length]?.image || b1
+              );
+              const altText =
+                slide.alt ||
+                slide.image_alt ||
+                slide.title ||
+                "Classy Missy Fashion Collection";
+              const href = slide.href || slide.link || "/brands";
+
+              return (
+                <SwiperSlide key={slide.id || slide.image || index}>
+                  <Link
+                    to={href}
+                    aria-label={`Explore: ${altText}`}
+                    className="block aspect-[7/5] overflow-hidden sm:aspect-[16/7] lg:aspect-[3/1]"
+                  >
+                    <img
+                      src={imageSrc}
+                      alt={altText}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </Link>
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
           <button
             type="button"
@@ -229,9 +322,9 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {promo.map((item, indx) => (
+          {promoList.map((item, indx) => (
             <Link
-              key={indx}
+              key={item.id || indx}
               to={item.href}
               className="group relative block overflow-hidden rounded-xl bg-gray-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
@@ -273,11 +366,17 @@ export default function Home() {
         </div>
 
         <div>
-          <img
-            className="rounded-xl h-20 sm:h-30 lg:h-40"
-            src={flash}
-            alt="flash-banner"
-          />
+          <Link
+            to={flashBanner.href}
+            aria-label={flashBanner.alt}
+            className="block overflow-hidden rounded-xl group"
+          >
+            <img
+              className="rounded-xl h-20 sm:h-30 lg:h-40 w-full object-cover transition-transform duration-500 group-hover:scale-[1.01]"
+              src={flashBanner.image}
+              alt={flashBanner.alt}
+            />
+          </Link>
         </div>
 
         <ProductSlider
@@ -289,7 +388,7 @@ export default function Home() {
         <CampaignSlider
           subtitle={"Campaigns"}
           title={"Curated for you"}
-          camp={campaignsList}
+          camp={activeSliderCampaigns}
         />
 
         <ProductSlider
@@ -299,8 +398,20 @@ export default function Home() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <img src={t1} alt="" className="h-full rounded-xl w-full object-cover" />
-          <img src={t2} alt="" className="h-full rounded-xl w-full object-cover" />
+          {middleBanners.map((banner, indx) => (
+            <Link
+              key={banner.id || indx}
+              to={banner.href}
+              aria-label={banner.alt}
+              className="group block overflow-hidden rounded-xl"
+            >
+              <img
+                src={banner.image}
+                alt={banner.alt}
+                className="h-full rounded-xl w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </Link>
+          ))}
         </div>
 
         <ProductSlider
@@ -310,8 +421,19 @@ export default function Home() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {beauty.map((b, indx) => (
-            <img className="rounded-xl" key={indx} src={b} alt={`Beauty ${indx}`} />
+          {bottomBanners.map((b, indx) => (
+            <Link
+              key={b.id || indx}
+              to={b.href}
+              aria-label={b.alt}
+              className="group block overflow-hidden rounded-xl"
+            >
+              <img
+                className="rounded-xl h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                src={b.image}
+                alt={b.alt}
+              />
+            </Link>
           ))}
         </div>
 
@@ -342,7 +464,7 @@ export default function Home() {
             </div>
             <Link
               to="/blogs"
-              className="inline-flex min-h-10 items-center rounded-full border border-border px-4 text-xs font-semibold text-foreground transition hover:bg-background-secondary"
+              className="inline-flex min-h-10 items-center rounded-full border border-border px-4 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary hover:bg-background-secondary"
             >
               Explore all blogs
             </Link>

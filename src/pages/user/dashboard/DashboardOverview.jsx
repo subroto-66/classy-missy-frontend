@@ -104,7 +104,7 @@ export default function DashboardOverview() {
           <Link to="/dashboard/orders" className="mt-5 inline-flex">
             <Button
               type="button"
-              className="rounded-lg bg-black text-xs text-white hover:bg-neutral-800"
+              className="rounded-lg bg-primary text-xs text-primary-foreground hover:bg-primary/90 shadow-xs"
             >
               View my orders <FiArrowRight size={14} />
             </Button>
@@ -118,15 +118,15 @@ export default function DashboardOverview() {
           <Link
             key={label}
             to={link}
-            className="group rounded-2xl border border-neutral-200 bg-white p-5 transition-shadow hover:shadow-sm"
+            className="group rounded-2xl border border-neutral-200 bg-white p-5 transition-shadow hover:shadow-sm hover:border-primary/40"
           >
             <div className="flex items-start justify-between">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 transition-colors group-hover:bg-black group-hover:text-white">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                 <Icon size={18} />
               </span>
               <FiArrowUpRight
                 size={16}
-                className="text-neutral-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-black"
+                className="text-neutral-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
               />
             </div>
             <p className="mt-4 text-[12px] text-neutral-600">{label}</p>
@@ -215,7 +215,7 @@ export default function DashboardOverview() {
                   Your purchases will appear here once you place an order.
                 </p>
                 <Link to="/products" className="mt-4 inline-flex">
-                  <Button size="sm" className="rounded-lg bg-black text-xs text-white">
+                  <Button size="sm" className="rounded-lg bg-primary text-xs text-primary-foreground hover:bg-primary/90 shadow-xs">
                     Start shopping
                   </Button>
                 </Link>

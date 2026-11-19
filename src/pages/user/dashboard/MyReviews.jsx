@@ -98,7 +98,7 @@ export default function MyReviews() {
             You haven't left any product reviews yet. Share your feedback on products you've tried to help the community!
           </p>
           <Link to="/products" className="mt-5 inline-flex">
-            <Button className="rounded-lg bg-black text-xs text-white hover:bg-neutral-800">
+            <Button className="rounded-lg bg-primary text-xs text-primary-foreground hover:bg-primary/90 shadow-xs">
               Browse products
             </Button>
           </Link>

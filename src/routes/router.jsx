@@ -60,6 +60,7 @@ export const router = createBrowserRouter([
       { path: "/wishlist", element: <Wishlist /> },
       { path: "/cart", element: <Cart /> },
       { path: "/my-cart", element: <Cart /> },
+      { path: "/checkout", element: <Cart defaultStep="checkout" /> },
       { path: "/about-us", element: <About /> },
       { path: "/faq", element: <FAQ /> },
       { path: "/privacy-policy", element: <PrivacyPolicy /> },

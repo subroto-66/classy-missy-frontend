@@ -110,7 +110,7 @@ export default function MyOrders() {
             When you purchase skincare items, you'll be able to track delivery progress and view purchase details right here.
           </p>
           <Link to="/products" className="mt-5 inline-flex">
-            <Button className="rounded-lg bg-black text-xs text-white hover:bg-neutral-800">
+            <Button className="rounded-lg bg-primary text-xs text-primary-foreground hover:bg-primary/90 shadow-xs">
               Explore products
             </Button>
           </Link>

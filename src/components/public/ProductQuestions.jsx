@@ -218,7 +218,7 @@ function ProductQuestionsContent({ productId }) {
             sortedQuestions.map((item) => (
               <article key={item.id} className="py-5 first:pt-0 last:pb-0">
                 <div className="flex gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground text-xs font-semibold text-background">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-xs font-semibold text-primary-foreground shadow-xs">
                     Q
                   </span>
                   <div className="min-w-0 flex-1">

@@ -108,7 +108,7 @@ function ProductDetailsContent({ product, relatedProducts = [] }) {
 
   const handleBuyNow = () => {
     addToCart(product, quantity);
-    navigate("/cart");
+    navigate("/checkout");
   };
 
   const updateQuantity = (nextQuantity) => {
@@ -149,7 +149,7 @@ function ProductDetailsContent({ product, relatedProducts = [] }) {
               </span>
             )}
             {discount > 0 && (
-              <span className="absolute bottom-4 left-4 rounded-full bg-foreground px-3 py-1.5 text-xs font-semibold text-background">
+              <span className="absolute bottom-4 left-4 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs">
                 Save {discount}%
               </span>
             )}
@@ -162,11 +162,11 @@ function ProductDetailsContent({ product, relatedProducts = [] }) {
               }
               aria-pressed={isFavorite}
               onClick={() => toggleWishlist(product)}
-              className="h-12 w-12 right-5 top-5 absolute rounded-lg border-border p-0 text-foreground"
+              className="h-12 w-12 right-5 top-5 absolute rounded-lg border-border p-0 text-foreground hover:border-primary/50"
             >
               <FiHeart
                 size={19}
-                className={isFavorite ? "fill-rose-500 text-rose-500" : ""}
+                className={isFavorite ? "fill-primary text-primary" : ""}
               />
             </Button>
 
@@ -282,7 +282,7 @@ function ProductDetailsContent({ product, relatedProducts = [] }) {
                 <span className="text-sm text-foreground-secondary line-through">
                   {formatProductPrice(product.oldPrice)}
                 </span>
-                <span className="rounded-full bg-foreground px-2.5 py-1 text-xs font-semibold text-background">
+                <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow-xs">
                   Save {discount}%
                 </span>
               </>

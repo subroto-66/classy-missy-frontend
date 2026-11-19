@@ -47,7 +47,7 @@ export default function Footer() {
           <div className="sm:col-span-2 lg:col-span-1">
             <Logo
               size="h-12 w-auto"
-              className="[&_img]:brightness-0 [&_img]:invert"
+              variant="dark"
             />
             <p className="mt-5 max-w-xs text-sm leading-7 text-white/60">
               Thoughtful skincare discovery for every day. Find products for
@@ -68,7 +68,7 @@ export default function Footer() {
                   aria-label={label}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-rose-200 hover:bg-rose-200 hover:text-[#101010]"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground"
                 >
                   <Icon size={17} />
                 </a>
@@ -86,7 +86,7 @@ export default function Footer() {
                   <li key={label}>
                     <Link
                       to={href}
-                      className="group inline-flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-rose-200"
+                      className="group inline-flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-primary"
                     >
                       {label}
                       <FiArrowUpRight
@@ -110,13 +110,13 @@ export default function Footer() {
             </p>
             <a
               href="mailto:hello@classymissy.com"
-              className="mt-4 inline-flex items-center gap-2.5 text-sm text-white/75 transition-colors hover:text-rose-200"
+              className="mt-4 inline-flex items-center gap-2.5 text-sm text-white/75 transition-colors hover:text-primary"
             >
-              <FiMail className="shrink-0 text-rose-200" size={16} />
+              <FiMail className="shrink-0 text-primary" size={16} />
               hello@classymissy.com
             </a>
             <p className="mt-3 flex items-center gap-2.5 text-sm text-white/60">
-              <FiMapPin className="shrink-0 text-rose-200" size={16} />
+              <FiMapPin className="shrink-0 text-primary" size={16} />
               Online, here for you
             </p>
             <p className="mt-3 pl-[26px] text-xs text-white/40">
@@ -130,7 +130,7 @@ export default function Footer() {
             </h2>
             <div className="mt-5 space-y-5">
               <div className="flex gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/5 text-rose-200">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/5 text-primary">
                   <FiTruck size={17} />
                 </span>
                 <div>
@@ -141,7 +141,7 @@ export default function Footer() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/5 text-rose-200">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/5 text-primary">
                   <FiRefreshCw size={16} />
                 </span>
                 <div>

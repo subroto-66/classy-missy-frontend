@@ -246,13 +246,13 @@ function ProductReviewsContent({ product }) {
                   {stars}
                   <FiStar
                     size={11}
-                    className="fill-foreground text-foreground"
+                    className="fill-amber-400 text-amber-400"
                   />
                 </span>
 
                 <div className="h-2 overflow-hidden rounded-full bg-background-secondary">
                   <div
-                    className="h-full rounded-full bg-foreground transition-all"
+                    className="h-full rounded-full bg-primary transition-all"
                     style={{ width: `${percentage}%` }}
                   />
                 </div>

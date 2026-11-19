@@ -32,7 +32,7 @@ export default function ProductCard({ product }) {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product);
-    navigate("/cart");
+    navigate("/checkout");
   };
 
   useEffect(
@@ -62,7 +62,7 @@ export default function ProductCard({ product }) {
           </span>
         )}
         {discount && (
-          <span className="absolute bottom-3 left-3 rounded-full bg-foreground px-2.5 py-1 text-[10px] font-semibold tracking-wide text-background">
+          <span className="absolute bottom-3 left-3 rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold tracking-wide text-primary-foreground shadow-xs">
             -{discount}%
           </span>
         )}
@@ -73,11 +73,11 @@ export default function ProductCard({ product }) {
           }
           aria-pressed={isFavorite}
           onClick={() => toggleWishlist(product)}
-          className="pointer-events-auto absolute right-3 top-3 cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/90 text-foreground shadow-sm backdrop-blur transition hover:scale-105 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
+          className="pointer-events-auto absolute right-3 top-3 cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/90 text-foreground shadow-sm backdrop-blur transition hover:scale-105 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <FiHeart
             size={17}
-            className={isFavorite ? "fill-foreground" : undefined}
+            className={isFavorite ? "fill-primary text-primary" : undefined}
           />
         </button>
       </div>
@@ -121,7 +121,7 @@ export default function ProductCard({ product }) {
             className={`pointer-events-auto h-11 w-12 sm:w-14 shrink-0 rounded-lg p-0 transition-all duration-300 ${
               justAdded
                 ? "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-600"
-                : "border-border bg-background text-foreground hover:bg-foreground hover:text-background"
+                : "border-border bg-background text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary"
             }`}
           >
             {justAdded ? (

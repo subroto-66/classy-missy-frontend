@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FiArrowLeft,
   FiBookOpen,
@@ -128,6 +128,60 @@ export default function BlogDetails() {
       }
     : getBlogDetails(blog);
 
+  const rawContentStr = useMemo(() => {
+    if (Array.isArray(blog.content)) {
+      return blog.content.join("\n\n");
+    }
+    return typeof blog.content === "string" ? blog.content : "";
+  }, [blog.content]);
+
+  const isHtmlContent = useMemo(() => {
+    return /<[a-z][\s\S]*>/i.test(rawContentStr);
+  }, [rawContentStr]);
+
+  // If blog has mock or structured sections AND not HTML content
+  const hasSections = Boolean(details.sections && details.sections.length > 0 && !isHtmlContent);
+
+  // If HTML content, inject id into H2 headings for smooth scrolling and TOC
+  const processedHtml = useMemo(() => {
+    if (!isHtmlContent || !rawContentStr) return "";
+    return rawContentStr.replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, text) => {
+      const plainText = text.replace(/<[^>]+>/g, "").trim();
+      const id = getSectionId(plainText);
+      return `<h2 id="${id}" class="scroll-mt-28" ${attrs}>${text}</h2>`;
+    });
+  }, [isHtmlContent, rawContentStr]);
+
+  // Compute Table of Contents
+  const tableOfContents = useMemo(() => {
+    if (hasSections) {
+      return details.sections.map((s) => ({
+        heading: s.heading,
+        id: getSectionId(s.heading),
+      }));
+    }
+    if (isHtmlContent) {
+      const matches = [...rawContentStr.matchAll(/<h2[^>]*>(.*?)<\/h2>/gi)];
+      return matches.map((m) => {
+        const text = m[1].replace(/<[^>]+>/g, "").trim();
+        return {
+          heading: text,
+          id: getSectionId(text),
+        };
+      });
+    }
+    return [];
+  }, [hasSections, details.sections, isHtmlContent, rawContentStr]);
+
+  const plainParagraphs = useMemo(() => {
+    if (hasSections || isHtmlContent) return [];
+    if (Array.isArray(blog.content)) return blog.content;
+    if (typeof blog.content === "string" && blog.content.trim()) {
+      return blog.content.split("\n\n").filter(Boolean);
+    }
+    return [];
+  }, [hasSections, isHtmlContent, blog.content]);
+
   const relatedBlogs =
     blog.relatedBlogs ||
     blog.related_blogs ||
@@ -195,8 +249,8 @@ export default function BlogDetails() {
               </button>
             </div>
 
-            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-foreground-secondary">
-              <FiTag size={12} aria-hidden="true" />
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-primary">
+              <FiTag size={12} className="text-primary" aria-hidden="true" />
               {blog.category}
             </span>
             <h1 className="mt-5 text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl xl:text-4xl">
@@ -234,7 +288,7 @@ export default function BlogDetails() {
         <div className="grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_270px] lg:gap-12">
           <div className="min-w-0">
             {details.intro && (
-              <div className="mb-7 rounded-2xl border-l-4 border-foreground bg-background-secondary/70 px-5 py-5 sm:px-7">
+              <div className="mb-7 rounded-2xl border-l-4 border-primary bg-primary/5 px-5 py-5 sm:px-7">
                 <p className="text-base leading-7 text-foreground sm:text-lg sm:leading-8">
                   {details.intro}
                 </p>
@@ -242,56 +296,78 @@ export default function BlogDetails() {
             )}
 
             <div className="space-y-9 sm:space-y-11">
-              {details.sections?.map((section, index) => {
-                const sectionId = getSectionId(section.heading);
-                return (
-                  <section
-                    key={section.heading}
-                    id={sectionId}
-                    aria-labelledby={`${sectionId}-title`}
-                    className="scroll-mt-28"
-                  >
-                    <div className="mb-4 flex items-start gap-3">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <h2
-                        id={`${sectionId}-title`}
-                        className="pt-0.5 text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl"
-                      >
-                        {section.heading}
-                      </h2>
-                    </div>
-                    <div className="space-y-4 pl-11">
-                      {section.paragraphs?.map((paragraph, paragraphIndex) => (
-                        <p
-                          key={`${sectionId}-${paragraphIndex}`}
-                          className="text-sm leading-7 text-foreground-secondary sm:text-base sm:leading-8"
+              {hasSections ? (
+                details.sections.map((section, index) => {
+                  const sectionId = getSectionId(section.heading);
+                  return (
+                    <section
+                      key={section.heading}
+                      id={sectionId}
+                      aria-labelledby={`${sectionId}-title`}
+                      className="scroll-mt-28"
+                    >
+                      <div className="mb-4 flex items-start gap-3">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground shadow-xs">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <h2
+                          id={`${sectionId}-title`}
+                          className="pt-0.5 text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl"
                         >
-                          {paragraph}
-                        </p>
-                      ))}
-                      {section.bullets?.length > 0 && (
-                        <ul className="space-y-3 rounded-2xl border border-border bg-background p-4 sm:p-5">
-                          {section.bullets.map((bullet) => (
-                            <li
-                              key={bullet}
-                              className="flex items-start gap-2.5 text-sm leading-6 text-foreground-secondary"
-                            >
-                              <FiCheck
-                                size={16}
-                                className="mt-1 shrink-0 text-foreground"
-                                aria-hidden="true"
-                              />
-                              <span>{bullet}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  </section>
-                );
-              })}
+                          {section.heading}
+                        </h2>
+                      </div>
+                      <div className="space-y-4 pl-11">
+                        {section.paragraphs?.map((paragraph, paragraphIndex) => (
+                          <p
+                            key={`${sectionId}-${paragraphIndex}`}
+                            className="text-sm leading-7 text-foreground-secondary sm:text-base sm:leading-8"
+                          >
+                            {paragraph}
+                          </p>
+                        ))}
+                        {section.bullets?.length > 0 && (
+                          <ul className="space-y-3 rounded-2xl border border-border bg-background p-4 sm:p-5">
+                            {section.bullets.map((bullet) => (
+                              <li
+                                key={bullet}
+                                className="flex items-start gap-2.5 text-sm leading-6 text-foreground-secondary"
+                              >
+                                <FiCheck
+                                  size={16}
+                                  className="mt-1 shrink-0 text-foreground"
+                                  aria-hidden="true"
+                                />
+                                <span>{bullet}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </section>
+                  );
+                })
+              ) : isHtmlContent ? (
+                <div
+                  className="prose prose-neutral max-w-none text-foreground-secondary leading-relaxed sm:text-base dark:prose-invert [&_h2]:text-foreground [&_h2]:font-bold [&_h2]:text-xl sm:[&_h2]:text-2xl [&_h2]:tracking-tight [&_h2]:mt-9 [&_h2]:mb-4 [&_h3]:text-foreground [&_h3]:font-semibold [&_h3]:text-lg sm:[&_h3]:text-xl [&_h3]:mt-7 [&_h3]:mb-3 [&_p]:mb-4 [&_p]:leading-7 sm:[&_p]:leading-8 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-4 [&_ul]:space-y-1.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-4 [&_ol]:space-y-1.5 [&_li]:leading-7 [&_blockquote]:border-l-4 [&_blockquote]:border-foreground [&_blockquote]:bg-background-secondary/50 [&_blockquote]:px-5 [&_blockquote]:py-3 [&_blockquote]:rounded-r-xl [&_blockquote]:italic [&_blockquote]:my-5 [&_a]:text-primary [&_a]:underline underline-offset-4 [&_hr]:my-8 [&_hr]:border-border [&_code]:rounded [&_code]:bg-background-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-xs [&_pre]:rounded-xl [&_pre]:bg-neutral-900 [&_pre]:text-neutral-100 [&_pre]:p-4 [&_pre]:overflow-x-auto"
+                  dangerouslySetInnerHTML={{ __html: processedHtml }}
+                />
+              ) : plainParagraphs.length > 0 ? (
+                <div className="space-y-4">
+                  {plainParagraphs.map((paragraph, pIdx) => (
+                    <p
+                      key={pIdx}
+                      className="text-sm leading-7 text-foreground-secondary sm:text-base sm:leading-8"
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-foreground-secondary leading-7">
+                  {blog.excerpt}
+                </p>
+              )}
             </div>
 
             {/* Key Takeaways */}
@@ -363,28 +439,28 @@ export default function BlogDetails() {
 
           {/* Sticky Sidebar */}
           <aside className="space-y-4 lg:sticky lg:top-28">
-            {details.sections?.length > 0 && (
+            {tableOfContents.length > 0 && (
               <nav
                 aria-label="In this article"
                 className="rounded-2xl border border-border bg-background p-5"
               >
                 <div className="flex items-center gap-2">
-                  <FiBookOpen size={16} aria-hidden="true" />
+                  <FiBookOpen size={16} className="text-primary" aria-hidden="true" />
                   <h2 className="text-sm font-semibold text-foreground">
                     In this article
                   </h2>
                 </div>
                 <ol className="mt-4 space-y-1">
-                  {details.sections.map((section, index) => (
-                    <li key={section.heading}>
+                  {tableOfContents.map((item, index) => (
+                    <li key={item.id || item.heading}>
                       <a
-                        href={`#${getSectionId(section.heading)}`}
-                        className="flex gap-2 rounded-lg px-2.5 py-2 text-xs leading-5 text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
+                        href={`#${item.id}`}
+                        className="flex gap-2 rounded-lg px-2.5 py-2 text-xs leading-5 text-foreground-secondary transition-colors hover:bg-primary/10 hover:text-primary"
                       >
                         <span className="shrink-0 tabular-nums">
                           {String(index + 1).padStart(2, "0")}
                         </span>
-                        <span>{section.heading}</span>
+                        <span>{item.heading}</span>
                       </a>
                     </li>
                   ))}
@@ -392,8 +468,8 @@ export default function BlogDetails() {
               </nav>
             )}
 
-            <div className="rounded-2xl bg-foreground p-5 text-background">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-background/65">
+            <div className="rounded-2xl bg-primary p-5 text-primary-foreground shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/75">
                 A gentle reminder
               </p>
               <p className="mt-2 text-sm leading-6">

@@ -136,8 +136,8 @@ export default function DashboardLayout() {
                 className={({ isActive }) =>
                   `flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-left text-[13px] transition-colors ${
                     isActive
-                      ? "bg-black font-semibold text-white"
-                      : "text-neutral-600 hover:bg-neutral-100 hover:text-black"
+                      ? "bg-primary font-semibold text-primary-foreground shadow-xs"
+                      : "text-neutral-600 hover:bg-primary/10 hover:text-primary"
                   } ${sidebarCollapsed ? "md:justify-center md:px-0" : ""}`
                 }
               >
@@ -147,7 +147,7 @@ export default function DashboardLayout() {
                 </span>
                 {path === "/dashboard/cart" && cartCount > 0 && (
                   <span
-                    className={`ml-auto rounded-full bg-neutral-200 px-2 py-0.5 text-[10px] font-semibold text-black ${
+                    className={`ml-auto rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary ${
                       sidebarCollapsed ? "md:hidden" : ""
                     }`}
                   >

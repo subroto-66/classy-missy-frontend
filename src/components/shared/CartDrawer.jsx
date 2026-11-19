@@ -127,7 +127,7 @@ export default function CartDrawer({ open, onClose }) {
                   <span>{formatPrice(subtotal)}</span>
                 </div>
               </div>
-              <Link to="/cart" onClick={onClose} className="block w-full">
+              <Link to="/checkout" onClick={onClose} className="block w-full">
                 <Button
                   type="button"
                   className="w-full"

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { FiArrowRight, FiCheckCircle, FiShoppingBag, FiTag } from "react-icons/fi";
-import { Link, useNavigate } from "react-router";
+import { FiArrowRight, FiCheckCircle, FiShoppingBag, FiTag, FiTrash2 } from "react-icons/fi";
+import { Link, useLocation, useNavigate } from "react-router";
 import Container from "../../components/layouts/Container";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
+import Textarea from "../../components/ui/Textarea";
 import CartItem from "../../components/shared/CartItem";
 import { useCart } from "../../context/CartContext";
 import { formatProductPrice } from "../../lib/productUtils";
@@ -13,14 +14,37 @@ import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import { showApiErrorToast } from "../../utils/apiErrorToast";
 
-export default function Cart() {
+export default function Cart({ defaultStep }) {
   const { items, setQuantity, removeFromCart, clearCart } = useCart();
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [checkoutStep, setCheckoutStep] = useState("cart"); // "cart" | "checkout" | "success"
+  const searchParams = new URLSearchParams(location.search);
+  const isDirectCheckout =
+    defaultStep === "checkout" ||
+    location.pathname === "/checkout" ||
+    searchParams.get("step") === "checkout" ||
+    location.state?.step === "checkout";
+
+  const [checkoutStep, setCheckoutStep] = useState(
+    isDirectCheckout ? "checkout" : "cart"
+  ); // "cart" | "checkout" | "success"
   const [placedOrder, setPlacedOrder] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Sync checkout step from URL or props
+  useEffect(() => {
+    if (
+      defaultStep === "checkout" ||
+      location.pathname === "/checkout" ||
+      searchParams.get("step") === "checkout" ||
+      location.state?.step === "checkout"
+    ) {
+      setCheckoutStep("checkout");
+      window.scrollTo({ top: 120, behavior: "smooth" });
+    }
+  }, [location.pathname, location.search, location.state, defaultStep]);
 
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
@@ -274,16 +298,27 @@ export default function Cart() {
                 ))}
               </ul>
             ) : (
-              <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-4 rounded-xl border border-border bg-background p-6">
+              <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-4 rounded-xl border border-border bg-background p-6 shadow-xs">
                 <div className="flex items-center justify-between border-b border-border pb-3">
                   <h2 className="text-base font-semibold text-foreground">Delivery Details</h2>
-                  <button
-                    type="button"
-                    onClick={() => setCheckoutStep("cart")}
-                    className="text-xs text-foreground-secondary underline hover:text-foreground"
-                  >
-                    ← Edit cart
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-emerald-600 font-medium hidden sm:flex items-center gap-1">
+                      <FiCheckCircle size={13} />
+                      Safe & Secure Checkout
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCheckoutStep("cart");
+                        if (location.pathname === "/checkout") {
+                          navigate("/cart", { replace: true });
+                        }
+                      }}
+                      className="text-xs text-foreground-secondary underline hover:text-foreground transition-colors"
+                    >
+                      ← Edit cart
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -322,12 +357,13 @@ export default function Cart() {
                 </div>
 
                 <div>
-                  <Input
+                  <Textarea
                     label="Shipping Address"
                     required
+                    rows={3}
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    placeholder="House, road, area details"
+                    placeholder="House / apartment no, road, area, landmark details..."
                   />
                 </div>
 
@@ -345,7 +381,7 @@ export default function Cart() {
                         onClick={() => setFormData({ ...formData, paymentMethod: m.id })}
                         className={`rounded-lg border p-3 text-center text-xs font-medium transition ${
                           formData.paymentMethod === m.id
-                            ? "border-foreground bg-foreground text-background"
+                            ? "border-primary bg-primary text-primary-foreground font-semibold shadow-xs"
                             : "border-border bg-background text-foreground hover:bg-background-secondary"
                         }`}
                       >
@@ -377,10 +413,82 @@ export default function Cart() {
               </form>
             )}
 
-            <aside className="rounded-xl border border-border bg-background p-5 lg:sticky lg:top-32 space-y-5">
+            <aside className="rounded-xl border border-border bg-background p-5 lg:sticky lg:top-32 space-y-5 shadow-xs">
               <h2 className="text-base font-semibold text-foreground">
                 Order summary
               </h2>
+
+              {/* Items in order with delete option */}
+              {checkoutStep === "checkout" && (
+                <div className="space-y-3 border-b border-border pb-4">
+                  <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-foreground-secondary">
+                    <span>Items in order ({itemCount})</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCheckoutStep("cart");
+                        if (location.pathname === "/checkout") {
+                          navigate("/cart", { replace: true });
+                        }
+                      }}
+                      className="text-[11px] normal-case text-foreground-secondary underline hover:text-foreground transition-colors"
+                    >
+                      Edit cart
+                    </button>
+                  </div>
+
+                  <div className="max-h-64 overflow-y-auto space-y-3 divide-y divide-border/40 pr-1">
+                    {items.map((item) => (
+                      <div key={item.id} className="group flex items-center gap-3 pt-3 first:pt-0">
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-border bg-background-secondary">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="h-full w-full object-cover"
+                          />
+                          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground shadow-xs">
+                            {item.quantity}
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-semibold text-foreground line-clamp-1">{item.name}</p>
+                          {item.brand && (
+                            <p className="text-[10px] text-foreground-secondary font-medium truncate">
+                              {item.brand}
+                            </p>
+                          )}
+                          <p className="text-[11px] text-foreground-secondary mt-0.5">
+                            Qty: <span className="font-semibold text-foreground">{item.quantity}</span> × {formatProductPrice(item.price)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="text-right">
+                            <span className="text-xs font-bold text-foreground block">
+                              {formatProductPrice(item.price * item.quantity)}
+                            </span>
+                            {item.oldPrice && item.oldPrice > item.price && (
+                              <span className="text-[10px] text-foreground-secondary line-through block">
+                                {formatProductPrice(item.oldPrice * item.quantity)}
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              removeFromCart(item.id);
+                              toast.success(`${item.name} removed from checkout`);
+                            }}
+                            title="Remove from checkout"
+                            className="flex h-7 w-7 items-center justify-center rounded-md text-foreground-secondary transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40"
+                          >
+                            <FiTrash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Coupon input */}
               <form onSubmit={handleApplyCoupon} className="flex gap-2">
@@ -439,23 +547,13 @@ export default function Cart() {
                 </div>
               </div>
 
-              {checkoutStep === "cart" ? (
+              {checkoutStep === "cart" && (
                 <Button
                   type="button"
                   onClick={handleProceedToCheckout}
                   className="w-full rounded-lg"
                 >
                   Proceed to Checkout
-                  <FiArrowRight size={16} />
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={handlePlaceOrder}
-                  loading={submitting}
-                  className="w-full rounded-lg"
-                >
-                  Place Order ({formatProductPrice(finalTotal)})
                   <FiArrowRight size={16} />
                 </Button>
               )}
