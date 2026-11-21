@@ -67,7 +67,8 @@ export const router = createBrowserRouter([
       { path: "/terms-and-conditions", element: <TermsAndConditions /> },
       { path: "/blogs", element: <Blogs /> },
       { path: "/blog/:blogSlug", element: <BlogDetails /> },
-      { path: "/product/:productSlug", element: <ProductDetails /> },
+      { path: "/product/:productSlug", element: <ProductDetails defaultView="landing" /> },
+      { path: "/landing/:productSlug", element: <ProductDetails defaultView="landing" isStandalone={true} /> },
     ],
   },
   {

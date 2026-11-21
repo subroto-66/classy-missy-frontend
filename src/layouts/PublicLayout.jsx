@@ -10,13 +10,15 @@ export default function PublicLayout() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
+  const isStandaloneLanding = pathname.startsWith("/landing/");
+
   return (
     <>
-      <Header />
-      <main className="min-h-[calc(100vh-100px)]">
+      {!isStandaloneLanding && <Header />}
+      <main className={isStandaloneLanding ? "min-h-screen" : "min-h-[calc(100vh-100px)]"}>
         <Outlet />
       </main>
-      <Footer />
+      {!isStandaloneLanding && <Footer />}
     </>
   );
 }

@@ -9,6 +9,33 @@ const highlightImages = {
 
 const products = [
   {
+    id: "multiple-honey-combo",
+    slug: "multiple-honey-combo",
+    name: "Multiple Natural Honey Combo (খাঁটি প্রাকৃতিক মাল্টিপল মধু কম্বো)",
+    brand: "Naturo BD",
+    image:
+      "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=1000&q=85",
+    images: [
+      "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=1000&q=85",
+      "https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=1000&q=85",
+      "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1000&q=85",
+      "https://images.unsplash.com/photo-1471943311424-646960669fbc?auto=format&fit=crop&w=1000&q=85",
+    ],
+    price: 1750,
+    oldPrice: 2250,
+    rating: 4.9,
+    reviews: 164,
+    badge: "Top Seller Combo",
+    category: "Organic & Superfoods",
+    problems: ["Immunity Boost", "Digestive Health", "Natural Energy", "Pure Nutrition"],
+    highlights: [
+      { title: "১০০% খাঁটি ও আনপ্রসেসড", image: highlightImages.leaf },
+      { title: "ল্যাব টেস্টে উত্তীর্ণ ও পরীক্ষিত", image: highlightImages.sparkle },
+      { title: "রোগ প্রতিরোধ ক্ষমতা বর্ধক", image: highlightImages.heart },
+      { title: "সারা দেশে ক্যাশ অন ডেলিভারি", image: highlightImages.water },
+    ],
+  },
+  {
     id: "paulas-choice-bha",
     name: "Skin Perfecting 2% BHA Liquid Exfoliant",
     brand: "Paula's Choice",

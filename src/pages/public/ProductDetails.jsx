@@ -6,7 +6,7 @@ import {
   FiHeart,
   FiStar,
 } from "react-icons/fi";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import Container from "../../components/layouts/Container";
 import Button from "../../components/ui/Button";
 import QuantityControl from "../../components/ui/QuantityControl";
@@ -14,6 +14,7 @@ import DeliveryOptions from "../../components/public/DeliveryOptions";
 import ProductHighlights from "../../components/public/ProductHighlights";
 import ProductQuestions from "../../components/public/ProductQuestions";
 import ProductReviews from "../../components/public/ProductReviews";
+import SingleProductLanding from "../../components/public/SingleProductLanding";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import productsMock from "../../data/products";
@@ -21,8 +22,13 @@ import { formatProductPrice, getProductSlug } from "../../lib/productUtils";
 import ProductSlider from "../../components/shared/ProductSlider";
 import api from "../../lib/axios";
 
-export default function ProductDetails() {
+export default function ProductDetails({ defaultView = "landing", isStandalone = false }) {
   const { productSlug } = useParams();
+  const [searchParams] = useSearchParams();
+  const requestedView = searchParams.get("view");
+  const initialMode = requestedView === "classic" ? "classic" : defaultView;
+  const [viewMode, setViewMode] = useState(initialMode);
+
   const [product, setProduct] = useState(() => {
     return productsMock.find(
       (item) => getProductSlug(item) === productSlug || String(item.id) === String(productSlug) || item.slug === productSlug,
@@ -79,7 +85,40 @@ export default function ProductDetails() {
     );
   }
 
-  return <ProductDetailsContent key={product.id || product.slug} product={product} relatedProducts={related} />;
+  if (viewMode === "landing") {
+    return (
+      <SingleProductLanding
+        key={product.id || product.slug}
+        product={product}
+        isStandalone={isStandalone}
+        onSwitchToClassic={() => setViewMode("classic")}
+      />
+    );
+  }
+
+  return (
+    <>
+      <div className="bg-amber-50 border-b border-amber-200 py-2.5 px-4 text-xs">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <span className="font-semibold text-amber-900">
+            🛍️ সাধারণ ক্যাটালগ ভিউ দেখছেন
+          </span>
+          <button
+            type="button"
+            onClick={() => setViewMode("landing")}
+            className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1 rounded-md transition shadow-2xs"
+          >
+            🚀 ফাস্ট-অর্ডার ল্যান্ডিং পেজে যান
+          </button>
+        </div>
+      </div>
+      <ProductDetailsContent
+        key={product.id || product.slug}
+        product={product}
+        relatedProducts={related}
+      />
+    </>
+  );
 }
 
 function ProductDetailsContent({ product, relatedProducts = [] }) {
